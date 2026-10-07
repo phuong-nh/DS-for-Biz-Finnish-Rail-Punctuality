@@ -1,0 +1,118 @@
+from typing import Any, cast
+
+import pandas as pd
+
+
+def _to_float(val: object) -> float | None:
+    if isinstance(val, (int, float)):
+        return float(val)
+    if isinstance(val, str):
+        try:
+            return float(val)
+        except ValueError:
+            return None
+    return None
+
+
+def _to_int(val: object) -> int | None:
+    if isinstance(val, int):
+        return val
+    if isinstance(val, float):
+        return int(val)
+    if isinstance(val, str):
+        try:
+            return int(val)
+        except ValueError:
+            return None
+    return None
+
+
+def parse_train(row: pd.Series[Any]) -> dict[str, object] | None:
+    is_cancelled = bool(row["cancelled"])
+    train_num = _to_int(row["trainNumber"]) or 0
+    dep_date = str(row["departureDate"])
+    train_type = str(row["trainType"])
+
+    if is_cancelled:
+        return {
+            "train_number": train_num,
+            "departure_date": dep_date,
+            "train_type": train_type,
+            "cancelled": True,
+            "origin": None,
+            "destination": None,
+            "delay_minutes": None,
+            "is_late": None,
+            "dest_temp": None,
+            "dest_snow_depth": None,
+            "dest_wind_speed": None,
+        }
+
+    safe_env: dict[str, object] = {
+        "nan": None,
+        "None": None,
+        "True": True,
+        "False": False,
+    }
+    raw_eval: object = eval(str(row["timeTableRows"]), safe_env)
+    stops_list: list[object] = (
+        cast(list[object], raw_eval) if isinstance(raw_eval, list) else []
+    )
+
+    stops: list[dict[str, object]] = []
+    for item in stops_list:
+        if isinstance(item, dict):
+            item_dict = cast(dict[object, object], item)
+            stops.append({str(k): v for k, v in item_dict.items()})
+
+    if len(stops) == 0:
+        return None
+
+    first_stop = stops[0]
+    last_stop = stops[-1]
+
+    delay = _to_float(last_stop.get("differenceInMinutes"))
+
+    # Finnish official threshold: >= 5 min at final station is late
+    is_late: int | None = None
+    if delay is not None:
+        is_late = 1 if delay >= 5 else 0
+
+    raw_weather: object = last_stop.get("weather_observations")
+    weather: dict[str, object] = {}
+    if isinstance(raw_weather, dict):
+        weather_dict = cast(dict[object, object], raw_weather)
+        weather = {str(k): v for k, v in weather_dict.items()}
+
+    dest_temp = _to_float(weather.get("Air temperature"))
+    dest_snow_depth = _to_float(weather.get("Snow depth"))
+    dest_wind_speed = _to_float(weather.get("Wind speed"))
+
+    return {
+        "train_number": train_num,
+        "departure_date": dep_date,
+        "train_type": train_type,
+        "cancelled": False,
+        "origin": str(first_stop.get("stationShortCode") or ""),
+        "destination": str(last_stop.get("stationShortCode") or ""),
+        "delay_minutes": delay,
+        "is_late": is_late,
+        "dest_temp": dest_temp,
+        "dest_snow_depth": dest_snow_depth,
+        "dest_wind_speed": dest_wind_speed,
+    }
+
+
+def extract_data(csv_path: str, nrows: int | None = None) -> pd.DataFrame:
+    df_raw: pd.DataFrame = pd.read_csv(csv_path, nrows=nrows)
+    parsed: list[dict[str, object]] = []
+    for _, row in df_raw.iterrows():
+        res = parse_train(row)
+        if res is not None:
+            parsed.append(res)
+    return pd.DataFrame(parsed)
+
+
+if __name__ == "__main__":
+    sample_df = extract_data("data/matched_data_2018_01.csv", nrows=10)
+    print(sample_df)
