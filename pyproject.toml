@@ -29,6 +29,7 @@ dev = [
 
 [tool.ruff.lint.per-file-ignores]
 "notebook.py" = ["B018", "F841", "PLR1711"]
+"notebook_latest.py" = ["B018", "F841", "PLR1711"]
 "*notebook*.py" = ["B018", "F841", "PLR1711"]
 
 [tool.basedpyright]
@@ -43,5 +44,6 @@ reportExplicitAny = false
 reportUnusedCallResult = "none"
 
 executionEnvironments = [
-  { root = "notebook.py", reportMissingParameterType = "none", reportUnknownVariableType = "none", reportUnknownParameterType = "none", reportUnknownArgumentType = "none", reportUnknownMemberType = "none", reportAttributeAccessIssue = "none", reportUnusedExpression = "none", reportUnusedVariable = "none", reportUnusedCallResult = "none" }
+  { root = "notebook.py", reportMissingParameterType = "none", reportUnknownVariableType = "none", reportUnknownParameterType = "none", reportUnknownArgumentType = "none", reportUnknownMemberType = "none", reportAttributeAccessIssue = "none", reportUnusedExpression = "none", reportUnusedVariable = "none", reportUnusedCallResult = "none" },
+  { root = "notebook_latest.py", reportMissingParameterType = "none", reportUnknownVariableType = "none", reportUnknownParameterType = "none", reportUnknownArgumentType = "none", reportUnknownMemberType = "none", reportAttributeAccessIssue = "none", reportUnusedExpression = "none", reportUnusedVariable = "none", reportUnusedCallResult = "none" }
 ]

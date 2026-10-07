@@ -41,6 +41,9 @@ def parse_train(row: pd.Series[Any]) -> dict[str, object] | None:
             "cancelled": True,
             "origin": None,
             "destination": None,
+            "corridor": None,
+            "departure_hour": None,
+            "day_of_week": None,
             "delay_minutes": None,
             "is_late": None,
             "dest_temp": None,
@@ -48,6 +51,7 @@ def parse_train(row: pd.Series[Any]) -> dict[str, object] | None:
             "dest_wind_speed": None,
         }
 
+    # timeTableRows is stored as Python literals (nan/None/True/False)
     safe_env: dict[str, object] = {
         "nan": None,
         "None": None,
@@ -71,6 +75,15 @@ def parse_train(row: pd.Series[Any]) -> dict[str, object] | None:
     first_stop = stops[0]
     last_stop = stops[-1]
 
+    origin = str(first_stop.get("stationShortCode") or "")
+    destination = str(last_stop.get("stationShortCode") or "")
+    corridor = f"{origin}-{destination}" if origin and destination else None
+
+    sched_dep = str(first_stop.get("scheduledTime") or "")
+    dep_hour = _to_int(sched_dep[11:13]) if len(sched_dep) >= 13 else None
+
+    day_of_week = pd.Timestamp(dep_date).dayofweek if dep_date else None
+
     delay = _to_float(last_stop.get("differenceInMinutes"))
 
     # Finnish official threshold: >= 5 min at final station is late
@@ -93,8 +106,11 @@ def parse_train(row: pd.Series[Any]) -> dict[str, object] | None:
         "departure_date": dep_date,
         "train_type": train_type,
         "cancelled": False,
-        "origin": str(first_stop.get("stationShortCode") or ""),
-        "destination": str(last_stop.get("stationShortCode") or ""),
+        "origin": origin,
+        "destination": destination,
+        "corridor": corridor,
+        "departure_hour": dep_hour,
+        "day_of_week": day_of_week,
         "delay_minutes": delay,
         "is_late": is_late,
         "dest_temp": dest_temp,
