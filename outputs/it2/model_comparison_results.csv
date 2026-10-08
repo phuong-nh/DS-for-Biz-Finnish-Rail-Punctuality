@@ -1,0 +1,8 @@
+Model,Feature Set,ROC-AUC,Accuracy,Precision,Recall
+Baseline (Always On-Time),None,0.5,0.7633,0.0,0.0
+Logistic Regression (Balanced),Set A (Calendar + Route),0.6382,0.5307,0.2987,0.7289
+Logistic Regression (Balanced),Set B (+ Weather),0.6538,0.5325,0.2992,0.7266
+"Decision Tree (depth 5, Balanced)",Set A (Calendar + Route),0.6309,0.4139,0.2777,0.9222
+"Decision Tree (depth 5, Balanced)",Set B (+ Weather),0.6351,0.4135,0.2773,0.92
+"Random Forest (depth 8, Balanced)",Set A (Calendar + Route),0.65,0.5147,0.294,0.7496
+"Random Forest (depth 8, Balanced)",Set B (+ Weather),0.6627,0.5396,0.3003,0.7103
