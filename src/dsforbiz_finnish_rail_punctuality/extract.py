@@ -49,6 +49,7 @@ def parse_train(row: pd.Series[Any]) -> dict[str, object] | None:
             "dest_temp": None,
             "dest_snow_depth": None,
             "dest_wind_speed": None,
+            "dest_precip_intensity": None,
         }
 
     # timeTableRows is stored as Python literals (nan/None/True/False)
@@ -100,6 +101,7 @@ def parse_train(row: pd.Series[Any]) -> dict[str, object] | None:
     dest_temp = _to_float(weather.get("Air temperature"))
     dest_snow_depth = _to_float(weather.get("Snow depth"))
     dest_wind_speed = _to_float(weather.get("Wind speed"))
+    dest_precip_intensity = _to_float(weather.get("Precipitation intensity"))
 
     return {
         "train_number": train_num,
@@ -116,6 +118,7 @@ def parse_train(row: pd.Series[Any]) -> dict[str, object] | None:
         "dest_temp": dest_temp,
         "dest_snow_depth": dest_snow_depth,
         "dest_wind_speed": dest_wind_speed,
+        "dest_precip_intensity": dest_precip_intensity,
     }
 
 
@@ -127,6 +130,24 @@ def extract_data(csv_path: str, nrows: int | None = None) -> pd.DataFrame:
         if res is not None:
             parsed.append(res)
     return pd.DataFrame(parsed)
+
+
+def extract_months(
+    months: list[str],
+    data_dir: str = "data",
+    output_path: str | None = None,
+) -> pd.DataFrame:
+    dfs: list[pd.DataFrame] = []
+    for month in months:
+        raw_path = f"{data_dir}/matched_data_{month}.csv"
+        df = extract_data(raw_path)
+        dfs.append(df)
+    combined: pd.DataFrame = (
+        pd.concat(dfs, ignore_index=True) if dfs else pd.DataFrame()
+    )
+    if output_path is not None:
+        combined.to_csv(output_path, index=False)
+    return combined
 
 
 if __name__ == "__main__":
