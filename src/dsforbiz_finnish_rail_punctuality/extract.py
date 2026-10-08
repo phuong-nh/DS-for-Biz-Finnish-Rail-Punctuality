@@ -1,3 +1,5 @@
+import os
+from concurrent.futures import ProcessPoolExecutor
 from typing import Any, cast
 
 import pandas as pd
@@ -123,25 +125,55 @@ def parse_train(row: pd.Series[Any]) -> dict[str, object] | None:
 
 
 def extract_data(csv_path: str, nrows: int | None = None) -> pd.DataFrame:
-    df_raw: pd.DataFrame = pd.read_csv(csv_path, nrows=nrows)
+    cols = ["trainNumber", "departureDate", "trainType", "cancelled", "timeTableRows"]
     parsed: list[dict[str, object]] = []
-    for _, row in df_raw.iterrows():
-        res = parse_train(row)
-        if res is not None:
-            parsed.append(res)
+    chunk_size = 2000
+    for chunk in pd.read_csv(csv_path, nrows=nrows, usecols=cols, chunksize=chunk_size):
+        for _, row in chunk.iterrows():
+            res = parse_train(row)
+            if res is not None:
+                parsed.append(res)
     return pd.DataFrame(parsed)
+
+
+def extract_single_month(month: str, data_dir: str = "data") -> pd.DataFrame:
+    cached_path = f"{data_dir}/extracted_{month}.csv"
+    if os.path.exists(cached_path):
+        return pd.read_csv(cached_path)
+    raw_path = f"{data_dir}/matched_data_{month}.csv"
+    if not os.path.exists(raw_path):
+        return pd.DataFrame()
+    df = extract_data(raw_path)
+    df.to_csv(cached_path, index=False)
+    return df
 
 
 def extract_months(
     months: list[str],
     data_dir: str = "data",
     output_path: str | None = None,
+    max_workers: int = 3,
 ) -> pd.DataFrame:
     dfs: list[pd.DataFrame] = []
-    for month in months:
-        raw_path = f"{data_dir}/matched_data_{month}.csv"
-        df = extract_data(raw_path)
-        dfs.append(df)
+    total = len(months)
+    if max_workers > 1:
+        with ProcessPoolExecutor(max_workers=max_workers) as executor:
+            month_futures = [
+                (month, executor.submit(extract_single_month, month, data_dir))
+                for month in months
+            ]
+            for idx, (month, future) in enumerate(month_futures, 1):
+                df_month = future.result()
+                if not df_month.empty:
+                    dfs.append(df_month)
+                print(f"[{idx}/{total}] Extracted {month} ({len(df_month)} rows)")
+    else:
+        for idx, month in enumerate(months, 1):
+            df_month = extract_single_month(month, data_dir)
+            if not df_month.empty:
+                dfs.append(df_month)
+            print(f"[{idx}/{total}] Extracted {month} ({len(df_month)} rows)")
+
     combined: pd.DataFrame = (
         pd.concat(dfs, ignore_index=True) if dfs else pd.DataFrame()
     )

@@ -8,34 +8,23 @@ app = marimo.App(width="medium")
 def _():
     import os
 
-    import marimo as mo
     import matplotlib.pyplot as plt
     import pandas as pd
 
     from dsforbiz_finnish_rail_punctuality.extract import extract_months
 
-    return extract_months, mo, os, pd, plt
-
-
-@app.cell
-def _(mo):
-    mo.md("""
-    # Finnish Rail Punctuality: Exploratory Data Analysis
-    *Data Science for Business I*
-
-    Comparing 4 representative months (Jan 2018, Jul 2018, Jul 2024, Dec 2024).
-    """)
-    return
+    return extract_months, os, pd, plt
 
 
 @app.cell
 def _(extract_months, os, pd):
+    os.makedirs("outputs", exist_ok=True)
     combined_path = "data/extracted_combined.csv"
     if os.path.exists(combined_path):
         df = pd.read_csv(combined_path)
     else:
-        sample_months = ["2018_01", "2018_07", "2024_07", "2024_12"]
-        df = extract_months(sample_months, output_path=combined_path)
+        all_months = [f"{y}_{m:02d}" for y in range(2018, 2025) for m in range(1, 13)]
+        df = extract_months(all_months, output_path=combined_path, max_workers=6)
 
     df["year_month"] = df["departure_date"].str[:7]
     df
@@ -43,22 +32,28 @@ def _(extract_months, os, pd):
 
 
 @app.cell
-def _(df, mo):
-    total_trips = len(df)
-    canc_trips = int(df["cancelled"].sum())
+def _(df, os, pd):
+    _total_trips = len(df)
+    _canc_trips = int(df["cancelled"].sum())
     non_canc = df[~df["cancelled"]].copy()
-    late_trips = int(non_canc["is_late"].sum())
-    late_pct = round((late_trips / len(non_canc)) * 100, 2)
+    _late_trips = int(non_canc["is_late"].sum())
+    _late_pct = round((_late_trips / len(non_canc)) * 100, 2)
 
-    mo.md(
-        f"""
-        ### Dataset Overview (4 Months Combined)
-        - **Total scheduled trips:** {total_trips:,}
-        - **Cancellations:** {canc_trips:,} ({canc_trips / total_trips * 100:.2f}%)
-        - **Arrived trips:** {len(non_canc):,}
-        - **Overall late arrivals (>= 5 min):** {late_trips:,} ({late_pct}%)
-        """
+    _overview_df = pd.DataFrame(
+        [
+            {
+                "Total Scheduled": _total_trips,
+                "Cancelled": _canc_trips,
+                "Cancellation Rate (%)": round(_canc_trips / _total_trips * 100, 2),
+                "Arrived Trips": len(non_canc),
+                "Late Arrivals (>= 5m)": _late_trips,
+                "Late Rate (%)": _late_pct,
+            }
+        ]
     )
+    os.makedirs("outputs", exist_ok=True)
+    _overview_df.to_csv("outputs/it1/eda_overview.csv", index=False)
+    _overview_df
     return (non_canc,)
 
 
@@ -73,6 +68,7 @@ def _(non_canc, plt):
     _ax.set_ylabel("Number of Trains")
     _ax.legend()
     _ax.grid(True, alpha=0.3)
+    _fig.savefig("outputs/it1/eda_delay_distribution.png", bbox_inches="tight")
     _fig
     return
 
@@ -81,29 +77,19 @@ def _(non_canc, plt):
 def _(non_canc, plt):
     _month_stats = non_canc.groupby("year_month")["is_late"].mean() * 100
 
-    _fig, _ax = plt.subplots(figsize=(7, 4))
+    _fig, _ax = plt.subplots(figsize=(14, 4))
     _bars = _ax.bar(
         _month_stats.index,
         _month_stats.values,
-        color=["steelblue", "orange", "gold", "darkblue"],
+        color="steelblue",
         edgecolor="black",
+        width=0.8,
     )
-    _ax.set_title("Lateness Rate (>= 5 min) by Month")
+    _ax.set_title("Lateness Rate (>= 5 min) by Month (2018–2024)")
     _ax.set_ylabel("% Delayed")
-    _ax.set_ylim(0, 35)
+    _ax.tick_params(axis="x", rotation=90)
     _ax.grid(True, axis="y", alpha=0.3)
-
-    for _bar in _bars:
-        _h = _bar.get_height()
-        _ax.annotate(
-            f"{_h:.1f}%",
-            xy=(_bar.get_x() + _bar.get_width() / 2, _h),
-            xytext=(0, 3),
-            textcoords="offset points",
-            ha="center",
-            va="bottom",
-        )
-
+    _fig.savefig("outputs/it1/eda_lateness_by_month.png", bbox_inches="tight")
     _fig
     return
 
@@ -132,6 +118,7 @@ def _(non_canc, plt):
             va="bottom",
         )
 
+    _fig.savefig("outputs/it1/eda_lateness_by_dow.png", bbox_inches="tight")
     _fig
     return
 
@@ -162,6 +149,7 @@ def _(non_canc, pd, plt):
             va="bottom",
         )
 
+    _fig.savefig("outputs/it1/eda_lateness_by_temp.png", bbox_inches="tight")
     _fig
     return
 
@@ -191,12 +179,8 @@ def _(non_canc, plt):
             va="center",
         )
 
+    _fig.savefig("outputs/it1/eda_top_corridors.png", bbox_inches="tight")
     _fig
-    return
-
-
-@app.cell
-def _():
     return
 
 

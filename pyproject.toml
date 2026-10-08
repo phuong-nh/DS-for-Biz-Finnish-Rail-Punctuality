@@ -12,6 +12,7 @@ dependencies = [
     "matplotlib>=3.11.2",
     "numpy>=2.5.4",
     "pandas>=3.0.6",
+    "scikit-learn>=1.9.1",
 ]
 
 [project.scripts]
@@ -43,7 +44,8 @@ reportExplicitAny = false
 reportUnusedCallResult = "none"
 
 executionEnvironments = [
-  { root = "notebook_2018_01.py", reportMissingParameterType = "none", reportUnknownVariableType = "none", reportUnknownParameterType = "none", reportUnknownArgumentType = "none", reportUnknownMemberType = "none", reportAttributeAccessIssue = "none", reportUnusedExpression = "none", reportUnusedVariable = "none", reportUnusedCallResult = "none" },
-  { root = "notebook_2024_12.py", reportMissingParameterType = "none", reportUnknownVariableType = "none", reportUnknownParameterType = "none", reportUnknownArgumentType = "none", reportUnknownMemberType = "none", reportAttributeAccessIssue = "none", reportUnusedExpression = "none", reportUnusedVariable = "none", reportUnusedCallResult = "none" },
-  { root = "notebook_eda.py", reportMissingParameterType = "none", reportUnknownVariableType = "none", reportUnknownParameterType = "none", reportUnknownArgumentType = "none", reportUnknownMemberType = "none", reportAttributeAccessIssue = "none", reportUnusedExpression = "none", reportUnusedVariable = "none", reportUnusedCallResult = "none" }
+  { root = "notebook_2018_01.py", reportMissingTypeStubs = "none", reportMissingParameterType = "none", reportUnknownVariableType = "none", reportUnknownParameterType = "none", reportUnknownArgumentType = "none", reportUnknownMemberType = "none", reportAttributeAccessIssue = "none", reportUnusedExpression = "none", reportUnusedVariable = "none", reportUnusedCallResult = "none" },
+  { root = "notebook_2024_12.py", reportMissingTypeStubs = "none", reportMissingParameterType = "none", reportUnknownVariableType = "none", reportUnknownParameterType = "none", reportUnknownArgumentType = "none", reportUnknownMemberType = "none", reportAttributeAccessIssue = "none", reportUnusedExpression = "none", reportUnusedVariable = "none", reportUnusedCallResult = "none" },
+  { root = "notebook_eda.py", reportMissingTypeStubs = "none", reportMissingParameterType = "none", reportUnknownVariableType = "none", reportUnknownParameterType = "none", reportUnknownArgumentType = "none", reportUnknownMemberType = "none", reportAttributeAccessIssue = "none", reportUnusedExpression = "none", reportUnusedVariable = "none", reportUnusedCallResult = "none" },
+  { root = "notebook_modeling.py", reportMissingTypeStubs = "none", reportMissingParameterType = "none", reportUnknownVariableType = "none", reportUnknownParameterType = "none", reportUnknownArgumentType = "none", reportUnknownMemberType = "none", reportAttributeAccessIssue = "none", reportUnusedExpression = "none", reportUnusedVariable = "none", reportUnusedCallResult = "none" }
 ]
