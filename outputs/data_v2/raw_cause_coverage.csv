@@ -1,0 +1,7 @@
+month,late,n_trains,share_with_cause,median_causes
+2018_01,False,1526,0.406,0.0
+2018_01,True,458,1.0,2.0
+2021_07,False,1713,0.327,0.0
+2021_07,True,256,1.0,2.0
+2024_01,False,678,0.479,0.0
+2024_01,True,957,1.0,4.0

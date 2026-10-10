@@ -1,0 +1,50 @@
+categoryCode,categoryName,validFrom,categoryName_en,detailedCategoryCode,detailedCategoryName
+A,Aikataulu ja liikennöinti,2017-01-01,Timetable and operation,A1,Mäkeenjäänti tai nopeuden poikkeuksellinen aleneminen mäessä
+A,Aikataulu ja liikennöinti,2017-01-01,Timetable and operation,A2,Aikataulutekninen syy
+A,Aikataulu ja liikennöinti,2017-01-01,Timetable and operation,A3,Junaa ei ole ajettu
+E,Etuajassakulku,2017-01-01,Running ahead of schedule,E1,Etuajassa lähtö
+E,Etuajassakulku,2017-01-01,Running ahead of schedule,E2,Ajo- tai pysähtymisajan alitus
+H,Henkilökunta,2017-01-01,Staff,,
+I,Muut syyt,2017-01-01,Other causes (incl. weather),I1,Poikkeukselliset sääolosuhteet
+I,Muut syyt,2017-01-01,Other causes (incl. weather),I2,Lehtikeli tai muu liukkaus
+I,Muut syyt,2017-01-01,Other causes (incl. weather),I3,"Ilkivalta, asiaton radalla liikkuminen"
+I,Muut syyt,2017-01-01,Other causes (incl. weather),I4,Muu syy
+J,Junan muodostamisen viivästyminen,2019-09-01,Delay in train formation,J1,Junan muodostamisen viivästyminen (kaikki liikenne)
+K,"Kalusto, moottorijunat ja vaunut",2017-01-01,Rolling stock (units and coaches),K1,Kalustopula
+K,"Kalusto, moottorijunat ja vaunut",2017-01-01,Rolling stock (units and coaches),K2,Kalustovika
+K,"Kalusto, moottorijunat ja vaunut",2017-01-01,Rolling stock (units and coaches),K3,Kalustosta johtuva nopeuden alennus
+K,"Kalusto, moottorijunat ja vaunut",2017-01-01,Rolling stock (units and coaches),K4,Kytkentä
+K,"Kalusto, moottorijunat ja vaunut",2017-01-01,Rolling stock (units and coaches),K5,Irroitus
+K,"Kalusto, moottorijunat ja vaunut",2017-01-01,Rolling stock (units and coaches),K6,Katsastamaton kalusto
+L,Liikenteenhoito,2017-01-01,Traffic management,L1,Yhteysliikenteen odotus (jatkoyhteydet)
+L,Liikenteenhoito,2017-01-01,Traffic management,L2,"Junakohtaus, edellä kulkeva juna tai ohitus"
+L,Liikenteenhoito,2017-01-01,Traffic management,L3,Konflikti kapasiteetissa
+L,Liikenteenhoito,2017-01-01,Traffic management,L4,Myöhästyminen ulkomailta
+L,Liikenteenhoito,2017-01-01,Traffic management,L5,Edessä oleva kalusto tukkii radan
+L,Liikenteenhoito,2017-01-01,Traffic management,L6,Junan lähtöön liittyvä odotus
+L,Liikenteenhoito,2017-01-01,Traffic management,L7,Liikenteenhoidosta johtuva
+L,Liikenteenhoito,2017-01-01,Traffic management,L8,Liikenteelliset päätökset
+M,Matkustajapalvelu,2017-01-01,Passenger service,M1,Matkustajajunan pysähtymisajan ylitys
+M,Matkustajapalvelu,2017-01-01,Passenger service,M2,Ylimääräinen pysähdys
+O,Onnettomuus,2017-01-01,Accident,O1,Henkilövahinko
+O,Onnettomuus,2017-01-01,Accident,O2,Eläinvahinko
+O,Onnettomuus,2017-01-01,Accident,O3,Tasoristeysonnettomuus
+O,Onnettomuus,2017-01-01,Accident,O4,Muut onnettomuudet ja vauriot
+P,Liikenteenhoitojärjestelmät,2017-01-01,Traffic control systems,P1,Ratainfran laiteviat
+P,Liikenteenhoitojärjestelmät,2017-01-01,Traffic control systems,P2,Tietojärjestelmä- ja päätelaiteviat
+P,Liikenteenhoitojärjestelmät,2017-01-01,Traffic control systems,P3,Liikkuvan kaluston valvontalaitevika tai -häiriö
+P,Liikenteenhoitojärjestelmät,2017-01-01,Traffic control systems,P4,Viestintälaite /-yhteysviat
+R,Ratatyö,2017-01-01,Track work,R1,Ratatyöt (ennakoidut työt nopeusrajoituksineen)
+R,Ratatyö,2017-01-01,Track work,R2,Ratatyön sovitun ajan ylitys
+R,Ratatyö,2017-01-01,Track work,R3,Liikennerajoite ratatyön jälkeen
+R,Ratatyö,2017-01-01,Track work,R4,Ratatyön toteutus poikkeaa suunnitellusta
+S,Sähkörata,2017-01-01,Electric track / catenary,S1,Sähkönjakeluhäiriö
+S,Sähkörata,2017-01-01,Electric track / catenary,S2,Sähköratavika
+T,Rata (ratarakenne),2017-01-01,Track structure,T1,Tilapäiset nopeusrajoitukset
+T,Rata (ratarakenne),2017-01-01,Track structure,T2,Liikenteenohjauksen asettamat nopeusrajoitukset (ratarakenne)
+T,Rata (ratarakenne),2017-01-01,Track structure,T3,Ratarikko / este radalla
+V,Vetokalusto,2017-01-01,Traction stock (locomotives),V1,Veturipula
+V,Vetokalusto,2017-01-01,Traction stock (locomotives),V2,Veturivika
+V,Vetokalusto,2017-01-01,Traction stock (locomotives),V3,Vetovoimasta johtuva nopeuden alennus / tehon puute
+V,Vetokalusto,2017-01-01,Traction stock (locomotives),V4,Katsastamaton vetokalusto
+X,Rataliikennekeskukselle ilmoitettavat syyt,2017-07-01,Causes reported to traffic centre,,

@@ -1,0 +1,25 @@
+where,variable,main_missing_%,missing_after_other_%,has_other_column
+origin (first row),Air temperature,3.6,3.6,False
+origin (first row),Wind speed,18.1,4.7,True
+origin (first row),Gust speed,18.1,4.7,True
+origin (first row),Relative humidity,3.6,3.6,False
+origin (first row),Dew-point temperature,3.6,3.6,False
+origin (first row),Precipitation amount,86.4,81.2,True
+origin (first row),Precipitation intensity,34.7,4.1,True
+origin (first row),Snow depth,32.5,4.1,True
+origin (first row),Pressure (msl),5.8,5.8,False
+origin (first row),Horizontal visibility,25.4,4.7,True
+origin (first row),Cloud amount,30.1,30.1,False
+origin (first row),Present weather (auto),25.4,25.4,False
+destination (last row),Air temperature,3.5,3.5,False
+destination (last row),Wind speed,17.4,4.6,True
+destination (last row),Gust speed,17.4,4.6,True
+destination (last row),Relative humidity,3.4,3.4,False
+destination (last row),Dew-point temperature,3.4,3.4,False
+destination (last row),Precipitation amount,92.4,89.3,True
+destination (last row),Precipitation intensity,33.7,3.9,True
+destination (last row),Snow depth,32.1,4.1,True
+destination (last row),Pressure (msl),5.6,5.6,False
+destination (last row),Horizontal visibility,24.7,4.7,True
+destination (last row),Cloud amount,29.4,29.4,False
+destination (last row),Present weather (auto),24.7,24.7,False

@@ -1,0 +1,10 @@
+,timetable rows per train,commercial arrival stops per train
+count,6000.0,6000.0
+mean,79.7,8.0
+std,65.1,4.1
+min,2.0,1.0
+25%,26.0,6.0
+50%,62.0,7.0
+75%,130.0,10.0
+max,246.0,24.0
+share of rows trainStopping,0.217,
