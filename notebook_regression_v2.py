@@ -122,6 +122,48 @@ def _(extract_months, os, pd):
 
 
 @app.cell
+def _(pd, test_df, train_df):
+    _pcts = [0.001, 0.01, 0.05, 0.5, 0.95, 0.99, 0.999]
+    _desc = pd.DataFrame(
+        {
+            "train (2018-2023)": train_df["delay_minutes"].describe(percentiles=_pcts),
+            "test (2024)": test_df["delay_minutes"].describe(percentiles=_pcts),
+        }
+    ).round(2)
+    _desc.to_csv("outputs/it4/delay_describe.csv")
+    _desc
+    return
+
+
+@app.cell
+def _(pd, train_df):
+    _rows = []
+    for _cut in [60, 120, 180, 240, 360]:
+        _rows.append({"cutoff": f"> {_cut} min", "n_train": int((train_df["delay_minutes"] > _cut).sum())})
+    for _cut in [-10, -15, -20, -30, -60]:
+        _rows.append({"cutoff": f"< {_cut} min", "n_train": int((train_df["delay_minutes"] < _cut).sum())})
+    _counts = pd.DataFrame(_rows)
+    _counts["share_%"] = (100 * _counts["n_train"] / len(train_df)).round(3)
+    _counts.to_csv("outputs/it4/delay_cutoff_counts.csv", index=False)
+    _counts
+    return
+
+
+@app.cell
+def _(pd, train_df):
+    _cols = ["departure_date", "train_number", "corridor", "departure_hour_local", "delay_minutes", "dest_temp"]
+    _extremes = pd.concat(
+        [
+            train_df.nlargest(10, "delay_minutes")[_cols],
+            train_df.nsmallest(10, "delay_minutes")[_cols],
+        ]
+    )
+    _extremes.to_csv("outputs/it4/delay_extreme_rows.csv", index=False)
+    _extremes
+    return
+
+
+@app.cell
 def _(
     Lasso,
     Ridge,
@@ -292,6 +334,32 @@ def _(lasso_path, np, plt, weather_cols):
     _ax.legend(loc="upper right", fontsize=8)
     _ax.grid(True, alpha=0.3)
     _fig.savefig("outputs/it4/lasso_coefficient_path.png", bbox_inches="tight")
+    _fig
+    return
+
+
+@app.cell
+def _(np, plt, test_preds, y_test):
+    _rng = np.random.default_rng(42)
+    _idx = _rng.choice(len(y_test), size=min(20000, len(y_test)), replace=False)
+    _y = y_test.to_numpy()[_idx]
+
+    _fig, _axes = plt.subplots(1, 2, figsize=(12, 4.5), sharey=True)
+    for _ax, _model_name, _title in zip(
+        _axes,
+        ["Linear Regression (OLS)", "Random Forest Regressor (depth 8)"],
+        ["OLS (Set B)", "Random Forest (Set B)"],
+    ):
+        _fitted = test_preds[(_model_name, "Set B (+ Weather)")][_idx]
+        _ax.scatter(_fitted, _y, s=4, alpha=0.15, color="teal")
+        _lims = [min(_fitted.min(), 0), max(_fitted.max(), 30)]
+        _ax.plot(_lims, _lims, color="red", linestyle="--", linewidth=1, label="y = y_hat")
+        _ax.set_title(f"Actual vs Fitted: {_title}")
+        _ax.set_xlabel("Fitted delay (min)")
+        _ax.legend(loc="upper left")
+        _ax.grid(True, alpha=0.3)
+    _axes[0].set_ylabel("Actual delay (min)")
+    _fig.savefig("outputs/it4/regression_actual_vs_fitted.png", bbox_inches="tight")
     _fig
     return
 
