@@ -1,0 +1,11 @@
+Model,Feature Set,MAE (clipped - raw),RMSE (clipped - raw),R2 (clipped - raw),ROC-AUC (clipped - raw)
+Huber Regression (robust),Set A (Calendar + Route),0.0001,0.0,0.0,0.0
+Huber Regression (robust),Set B (+ Weather),0.0,0.0,0.0,0.0
+Lasso (alpha=0.1),Set A (Calendar + Route),-0.0427,0.0274,-0.0037,0.0024
+Lasso (alpha=0.1),Set B (+ Weather),-0.0421,0.0308,-0.0041,0.0025
+Linear Regression (OLS),Set A (Calendar + Route),-0.0485,0.0208,-0.0028,0.0008
+Linear Regression (OLS),Set B (+ Weather),-0.0487,0.0236,-0.0032,0.0008
+Random Forest Regressor (depth 8),Set A (Calendar + Route),-0.0613,0.0142,-0.0019,-0.0003
+Random Forest Regressor (depth 8),Set B (+ Weather),-0.0445,-0.0132,0.0017,0.0058
+Ridge (alpha=100000),Set A (Calendar + Route),-0.0436,0.0202,-0.0027,0.001
+Ridge (alpha=100000),Set B (+ Weather),-0.0431,0.0229,-0.0031,0.0009

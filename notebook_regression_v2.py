@@ -12,7 +12,7 @@ def _():
     import numpy as np
     import pandas as pd
     from sklearn.ensemble import RandomForestRegressor
-    from sklearn.linear_model import Lasso, LinearRegression, Ridge
+    from sklearn.linear_model import HuberRegressor, Lasso, LinearRegression, Ridge
     from sklearn.metrics import (
         accuracy_score,
         mean_absolute_error,
@@ -28,6 +28,7 @@ def _():
     from dsforbiz_finnish_rail_punctuality.extract_v2 import extract_months
 
     return (
+        HuberRegressor,
         Lasso,
         LinearRegression,
         RandomForestRegressor,
@@ -164,6 +165,41 @@ def _(pd, train_df):
 
 
 @app.cell
+def _(pd, train_df):
+    # about the 0.1% / 99.9% percentiles of the training years, see delay_describe.csv
+    clip_low, clip_high = -15, 120
+    y_train_clipped = train_df["delay_minutes"].clip(lower=clip_low, upper=clip_high)
+
+    _low = train_df[train_df["delay_minutes"] < clip_low]
+    _high = train_df[train_df["delay_minutes"] > clip_high]
+    _report = pd.DataFrame(
+        {
+            "side": [f"< {clip_low} min", f"> {clip_high} min"],
+            "n_rows_clipped": [len(_low), len(_high)],
+            "share_of_train_%": [round(100 * len(_low) / len(train_df), 3), round(100 * len(_high) / len(train_df), 3)],
+            "mean_delay_before": [round(_low["delay_minutes"].mean(), 1), round(_high["delay_minutes"].mean(), 1)],
+            "n_distinct_trains": [_low["train_number"].nunique(), _high["train_number"].nunique()],
+            "n_distinct_days": [_low["departure_date"].nunique(), _high["departure_date"].nunique()],
+        }
+    )
+    _report.to_csv("outputs/it4/clipping_report.csv", index=False)
+
+    _details = pd.concat(
+        [
+            _low["train_number"].value_counts().head(5).rename_axis("value").reset_index().assign(what="early side: top train numbers"),
+            _high["departure_date"].value_counts().head(5).rename_axis("value").reset_index().assign(what="late side: top days"),
+            _high["train_number"].value_counts().head(5).rename_axis("value").reset_index().assign(what="late side: top train numbers"),
+        ]
+    )
+    _details.to_csv("outputs/it4/clipping_details.csv", index=False)
+    print("train target mean raw:", round(train_df["delay_minutes"].mean(), 3), "clipped:", round(y_train_clipped.mean(), 3))
+    print("train target std raw:", round(train_df["delay_minutes"].std(), 3), "clipped:", round(y_train_clipped.std(), 3))
+    print(_details)
+    _report
+    return (y_train_clipped,)
+
+
+@app.cell
 def _(
     Lasso,
     Ridge,
@@ -220,6 +256,7 @@ def _(
 
 @app.cell
 def _(
+    HuberRegressor,
     Lasso,
     LinearRegression,
     RandomForestRegressor,
@@ -243,13 +280,15 @@ def _(
     y_test,
     y_test_late,
     y_train,
+    y_train_clipped,
 ):
-    def _score(model_name, feature_set, pred):
+    def _score(model_name, feature_set, target, pred):
         # Official 5-min punctuality threshold applied to predicted minutes
         _late_pred = (pred >= 5.0).astype(int)
         return {
             "Model": model_name,
             "Feature Set": feature_set,
+            "Train Target": target,
             "MAE": round(float(mean_absolute_error(y_test, pred)), 4),
             "RMSE": round(float(root_mean_squared_error(y_test, pred)), 4),
             "R2": round(float(r2_score(y_test, pred)), 4),
@@ -260,7 +299,8 @@ def _(
         }
 
     reg_results = [
-        _score("Baseline (Train Mean)", "None", np.full(len(y_test), y_train.mean())),
+        _score("Baseline (Train Mean)", "None", "raw", np.full(len(y_test), y_train.mean())),
+        _score("Baseline (Train Mean)", "None", "clipped", np.full(len(y_test), y_train_clipped.mean())),
     ]
     test_preds = {}
 
@@ -268,6 +308,7 @@ def _(
         ("Linear Regression (OLS)", make_pipeline(StandardScaler(), LinearRegression())),
         (f"Ridge (alpha={best_ridge_alpha:g})", make_pipeline(StandardScaler(), Ridge(alpha=best_ridge_alpha))),
         (f"Lasso (alpha={best_lasso_alpha:g})", make_pipeline(StandardScaler(), Lasso(alpha=best_lasso_alpha))),
+        ("Huber Regression (robust)", make_pipeline(StandardScaler(), HuberRegressor(max_iter=200))),
         (
             "Random Forest Regressor (depth 8)",
             RandomForestRegressor(n_estimators=100, max_depth=8, random_state=42, n_jobs=-1),
@@ -276,11 +317,12 @@ def _(
 
     for _model_name, _model in _models:
         for _f_label, _f_cols in [("Set A (Calendar + Route)", feat_a), ("Set B (+ Weather)", feat_b)]:
-            _reg = _model
-            _reg.fit(train_df[_f_cols], y_train)
-            _pred = _reg.predict(test_df[_f_cols])
-            test_preds[(_model_name, _f_label)] = _pred
-            reg_results.append(_score(_model_name, _f_label, _pred))
+            for _target, _y in [("raw", y_train), ("clipped", y_train_clipped)]:
+                _reg = _model
+                _reg.fit(train_df[_f_cols], _y)
+                _pred = _reg.predict(test_df[_f_cols])
+                test_preds[(_model_name, _f_label, _target)] = _pred
+                reg_results.append(_score(_model_name, _f_label, _target, _pred))
     return reg_results, test_preds
 
 
@@ -288,8 +330,15 @@ def _(
 def _(pd, reg_results):
     _results_df = pd.DataFrame(reg_results)
     _results_df.to_csv("outputs/it4/model_comparison_results.csv", index=False)
+
+    _wide = _results_df[_results_df["Feature Set"] != "None"].pivot_table(
+        index=["Model", "Feature Set"], columns="Train Target", values=["MAE", "RMSE", "R2", "ROC-AUC"]
+    )
+    _effect = pd.DataFrame(
+        {m + " (clipped - raw)": (_wide[(m, "clipped")] - _wide[(m, "raw")]).round(4) for m in ["MAE", "RMSE", "R2", "ROC-AUC"]}
+    )
+    _effect.to_csv("outputs/it4/clipping_effect.csv")
     _results_df
-    return
 
 
 @app.cell
@@ -298,20 +347,17 @@ def _(np, plt, test_preds, y_test):
     _idx = _rng.choice(len(y_test), size=min(20000, len(y_test)), replace=False)
     _y = y_test.to_numpy()[_idx]
 
-    _panels = [
-        ("Linear Regression (OLS)", "OLS (Set B)"),
-        ("Random Forest Regressor (depth 8)", "Random Forest (Set B)"),
-    ]
-
-    _fig, _axes = plt.subplots(1, 2, figsize=(12, 4.5), sharey=True)
-    for _ax, (_model_name, _title) in zip(_axes, _panels):
-        _fitted = test_preds[(_model_name, "Set B (+ Weather)")][_idx]
-        _ax.scatter(_fitted, _y - _fitted, s=4, alpha=0.15, color="teal")
-        _ax.axhline(0, color="red", linestyle="--", linewidth=1)
-        _ax.set_title(f"Residuals vs Fitted: {_title}")
-        _ax.set_xlabel("Fitted delay (min)")
-        _ax.grid(True, alpha=0.3)
-    _axes[0].set_ylabel("Residual e = y - y_hat (min)")
+    _fig, _axes = plt.subplots(2, 2, figsize=(12, 9), sharey=True)
+    for _row, (_model_name, _short) in enumerate([("Linear Regression (OLS)", "OLS"), ("Random Forest Regressor (depth 8)", "RF")]):
+        for _col, _target in enumerate(["raw", "clipped"]):
+            _ax = _axes[_row, _col]
+            _fitted = test_preds[(_model_name, "Set B (+ Weather)", _target)][_idx]
+            _ax.scatter(_fitted, _y - _fitted, s=4, alpha=0.15, color="teal")
+            _ax.axhline(0, color="red", linestyle="--", linewidth=1)
+            _ax.set_title(f"Residuals vs Fitted: {_short} (Set B, {_target} train target)")
+            _ax.set_xlabel("Fitted delay (min)")
+            _ax.grid(True, alpha=0.3)
+        _axes[_row, 0].set_ylabel("Residual e = y - y_hat (min)")
     _fig.savefig("outputs/it4/regression_residuals.png", bbox_inches="tight")
     _fig
     return
@@ -344,21 +390,19 @@ def _(np, plt, test_preds, y_test):
     _idx = _rng.choice(len(y_test), size=min(20000, len(y_test)), replace=False)
     _y = y_test.to_numpy()[_idx]
 
-    _fig, _axes = plt.subplots(1, 2, figsize=(12, 4.5), sharey=True)
-    for _ax, _model_name, _title in zip(
-        _axes,
-        ["Linear Regression (OLS)", "Random Forest Regressor (depth 8)"],
-        ["OLS (Set B)", "Random Forest (Set B)"],
-    ):
-        _fitted = test_preds[(_model_name, "Set B (+ Weather)")][_idx]
-        _ax.scatter(_fitted, _y, s=4, alpha=0.15, color="teal")
-        _lims = [min(_fitted.min(), 0), max(_fitted.max(), 30)]
-        _ax.plot(_lims, _lims, color="red", linestyle="--", linewidth=1, label="y = y_hat")
-        _ax.set_title(f"Actual vs Fitted: {_title}")
-        _ax.set_xlabel("Fitted delay (min)")
-        _ax.legend(loc="upper left")
-        _ax.grid(True, alpha=0.3)
-    _axes[0].set_ylabel("Actual delay (min)")
+    _fig, _axes = plt.subplots(2, 2, figsize=(12, 9), sharey=True)
+    for _row, (_model_name, _short) in enumerate([("Linear Regression (OLS)", "OLS"), ("Random Forest Regressor (depth 8)", "RF")]):
+        for _col, _target in enumerate(["raw", "clipped"]):
+            _ax = _axes[_row, _col]
+            _fitted = test_preds[(_model_name, "Set B (+ Weather)", _target)][_idx]
+            _ax.scatter(_fitted, _y, s=4, alpha=0.15, color="teal")
+            _lims = [min(_fitted.min(), 0), max(_fitted.max(), 30)]
+            _ax.plot(_lims, _lims, color="red", linestyle="--", linewidth=1, label="y = y_hat")
+            _ax.set_title(f"Actual vs Fitted: {_short} (Set B, {_target} train target)")
+            _ax.set_xlabel("Fitted delay (min)")
+            _ax.legend(loc="upper left")
+            _ax.grid(True, alpha=0.3)
+        _axes[_row, 0].set_ylabel("Actual delay (min)")
     _fig.savefig("outputs/it4/regression_actual_vs_fitted.png", bbox_inches="tight")
     _fig
     return
