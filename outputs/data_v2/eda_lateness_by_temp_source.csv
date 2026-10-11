@@ -1,0 +1,6 @@
+temp_bin,origin (departure),origin (departure) n,destination (arrival),destination (arrival) n,route minimum,route minimum n
+< -15°C,39.54,9180,39.17,8733,38.13,20005
+-15 to -5°C,27.57,44937,27.81,44171,26.07,65155
+-5 to 5°C,18.27,181223,18.46,180272,16.5,192345
+5 to 15°C,15.36,144755,15.66,141659,16.19,150158
+> 15°C,18.7,116292,18.3,121846,18.27,81447
