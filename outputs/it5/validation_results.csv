@@ -1,0 +1,13 @@
+Model,Feature Set,ROC-AUC,Accuracy,Precision,Recall
+Logistic Regression (Balanced),Set A (Calendar + Route + Journey),0.6133,0.5215,0.2032,0.6766
+Logistic Regression (Balanced),Set B (+ Destination Weather),0.6166,0.5184,0.2018,0.6752
+Logistic Regression (Balanced),Set C (+ Origin Weather),0.6248,0.5303,0.2043,0.6641
+Logistic Regression (Balanced),Set D (+ All Weather),0.6294,0.5213,0.2045,0.6845
+"Decision Tree (depth 5, Balanced)",Set A (Calendar + Route + Journey),0.5965,0.5322,0.2002,0.638
+"Decision Tree (depth 5, Balanced)",Set B (+ Destination Weather),0.6054,0.5194,0.1993,0.6592
+"Decision Tree (depth 5, Balanced)",Set C (+ Origin Weather),0.61,0.5737,0.2029,0.5642
+"Decision Tree (depth 5, Balanced)",Set D (+ All Weather),0.613,0.5266,0.1999,0.648
+"Random Forest (depth 8, Balanced)",Set A (Calendar + Route + Journey),0.6213,0.5424,0.204,0.6361
+"Random Forest (depth 8, Balanced)",Set B (+ Destination Weather),0.6267,0.5555,0.2087,0.6326
+"Random Forest (depth 8, Balanced)",Set C (+ Origin Weather),0.6306,0.5482,0.2057,0.6326
+"Random Forest (depth 8, Balanced)",Set D (+ All Weather),0.632,0.5599,0.2098,0.6281
