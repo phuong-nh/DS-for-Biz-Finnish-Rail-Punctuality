@@ -16,3 +16,7 @@ Random Forest Regressor (depth 8),Set A (Calendar + Route + Journey),5.6385,14.1
 Random Forest Regressor (depth 8),Set B (+ Destination Weather),5.6253,13.971,0.0756,0.7026,0.7626,0.4866,0.2902
 Random Forest Regressor (depth 8),Set C (+ Origin Weather),5.6173,13.9442,0.0791,0.7056,0.7652,0.4961,0.3002
 Random Forest Regressor (depth 8),Set D (+ All Weather),5.6131,13.8644,0.0896,0.7042,0.768,0.5067,0.2619
+Gradient Boosting (HistGB),Set A (Calendar + Route + Journey),5.6794,14.1353,0.0537,0.6876,0.7405,0.4263,0.3196
+Gradient Boosting (HistGB),Set B (+ Destination Weather),5.6777,13.9197,0.0823,0.7028,0.7496,0.4523,0.3397
+Gradient Boosting (HistGB),Set C (+ Origin Weather),5.6176,13.8191,0.0956,0.7098,0.7511,0.4579,0.3546
+Gradient Boosting (HistGB),Set D (+ All Weather),5.6631,13.7785,0.1009,0.705,0.7499,0.456,0.3641

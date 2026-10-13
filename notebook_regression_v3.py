@@ -11,7 +11,7 @@ def _():
     import matplotlib.pyplot as plt
     import numpy as np
     import pandas as pd
-    from sklearn.ensemble import RandomForestRegressor
+    from sklearn.ensemble import HistGradientBoostingRegressor, RandomForestRegressor
     from sklearn.linear_model import Lasso, LinearRegression, Ridge
     from sklearn.metrics import (
         accuracy_score,
@@ -28,6 +28,7 @@ def _():
     from dsforbiz_finnish_rail_punctuality.extract_v2 import extract_months
 
     return (
+        HistGradientBoostingRegressor,
         Lasso,
         LinearRegression,
         RandomForestRegressor,
@@ -207,12 +208,53 @@ def _(
 
 @app.cell
 def _(
+    HistGradientBoostingRegressor,
+    feature_sets,
+    mean_absolute_error,
+    pd,
+    root_mean_squared_error,
+    train_df,
+    y_train,
+):
+    _cols = feature_sets["tree"][-1][1]
+    _is_fit = train_df["year"] < 2023
+    _y_val = train_df.loc[~_is_fit, "delay_minutes"]
+
+    _rows = []
+    for _lr in [0.05, 0.1]:
+        for _iters in [200, 500]:
+            for _leaves in [31, 63]:
+                _hgb = HistGradientBoostingRegressor(
+                    learning_rate=_lr, max_iter=_iters, max_leaf_nodes=_leaves, early_stopping=False, random_state=42
+                )
+                _hgb.fit(train_df.loc[_is_fit, _cols], y_train[_is_fit])
+                _pred = _hgb.predict(train_df.loc[~_is_fit, _cols])
+                _rows.append(
+                    {
+                        "learning_rate": _lr,
+                        "max_iter": _iters,
+                        "max_leaf_nodes": _leaves,
+                        "Val MAE": round(float(mean_absolute_error(_y_val, _pred)), 4),
+                        "Val RMSE": round(float(root_mean_squared_error(_y_val, _pred)), 4),
+                    }
+                )
+    hgb_df = pd.DataFrame(_rows).sort_values("Val RMSE")
+    hgb_df.to_csv("outputs/it4b/hgb_validation.csv", index=False)
+    best_hgb = hgb_df.iloc[0]
+    hgb_df
+    return (best_hgb,)
+
+
+@app.cell
+def _(
+    HistGradientBoostingRegressor,
     Lasso,
     LinearRegression,
     RandomForestRegressor,
     Ridge,
     StandardScaler,
     accuracy_score,
+    best_hgb,
     best_lasso_alpha,
     best_ridge_alpha,
     feature_sets,
@@ -259,6 +301,17 @@ def _(
             RandomForestRegressor(n_estimators=100, max_depth=8, random_state=42, n_jobs=-1),
             "tree",
         ),
+        (
+            "Gradient Boosting (HistGB)",
+            HistGradientBoostingRegressor(
+                learning_rate=float(best_hgb["learning_rate"]),
+                max_iter=int(best_hgb["max_iter"]),
+                max_leaf_nodes=int(best_hgb["max_leaf_nodes"]),
+                early_stopping=False,
+                random_state=42,
+            ),
+            "tree",
+        ),
     ]
 
     for _model_name, _model, _kind in _models:
@@ -301,9 +354,14 @@ def _(np, plt, test_preds, y_test):
     _idx = _rng.choice(len(y_test), size=min(20000, len(y_test)), replace=False)
     _y = y_test.to_numpy()[_idx]
 
-    _fig, _axes = plt.subplots(1, 2, figsize=(12, 4.5), sharey=True)
+    _fig, _axes = plt.subplots(1, 3, figsize=(17, 4.5), sharey=True)
     for _ax, (_model_name, _title) in zip(
-        _axes, [("Linear Regression (OLS)", "OLS (Set D)"), ("Random Forest Regressor (depth 8)", "Random Forest (Set D)")]
+        _axes,
+        [
+            ("Linear Regression (OLS)", "OLS (Set D)"),
+            ("Random Forest Regressor (depth 8)", "Random Forest (Set D)"),
+            ("Gradient Boosting (HistGB)", "HistGB (Set D)"),
+        ],
     ):
         _fitted = test_preds[(_model_name, "Set D (+ All Weather)")][_idx]
         _ax.scatter(_fitted, _y - _fitted, s=4, alpha=0.15, color="teal")

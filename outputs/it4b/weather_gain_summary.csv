@@ -11,3 +11,6 @@ Lasso (alpha=0.1),Set D (+ All Weather),0.0313,-0.0478,-0.1927,0.026
 Random Forest Regressor (depth 8),Set B (+ Destination Weather),0.0115,-0.0132,-0.2033,0.0271
 Random Forest Regressor (depth 8),Set C (+ Origin Weather),0.0145,-0.0212,-0.2301,0.0306
 Random Forest Regressor (depth 8),Set D (+ All Weather),0.0131,-0.0254,-0.3099,0.0411
+Gradient Boosting (HistGB),Set B (+ Destination Weather),0.0152,-0.0017,-0.2156,0.0286
+Gradient Boosting (HistGB),Set C (+ Origin Weather),0.0222,-0.0618,-0.3162,0.0419
+Gradient Boosting (HistGB),Set D (+ All Weather),0.0174,-0.0163,-0.3568,0.0472
