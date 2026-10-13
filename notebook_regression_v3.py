@@ -74,21 +74,27 @@ def _(extract_months, os, pd):
     _arrived["dow_cat"] = _arrived["day_of_week"].astype(int)
     _arrived["hour_cat"] = _arrived["hour_clean"].astype(int)
 
-    _top_corrs = _arrived["corridor"].value_counts().head(10).index
+    # only use training years for anything learned from the data (corridors, medians)
+    _is_train = _arrived["year"] < 2024
+    _top_corrs = _arrived.loc[_is_train, "corridor"].value_counts().head(10).index
     _arrived["corridor_clean"] = _arrived["corridor"].where(_arrived["corridor"].isin(_top_corrs), "Other")
 
-    _arrived["dest_temp_imp"] = _arrived["dest_temp"].fillna(_arrived["dest_temp"].median())
-    _arrived["dest_snow_imp"] = _arrived["dest_snow_depth"].fillna(0.0)
-    _arrived["dest_wind_imp"] = _arrived["dest_wind"].fillna(_arrived["dest_wind"].median())
-    _arrived["dest_precip_imp"] = _arrived["dest_precip_intensity"].fillna(0.0)
+    for _p in ["origin", "dest"]:
+        _core = [f"{_p}_temp", f"{_p}_snow_depth", f"{_p}_wind", f"{_p}_precip_intensity"]
+        _arrived[f"{_p}_wx_missing"] = _arrived[_core].isna().any(axis=1).astype(int)
+        for _c in _core:
+            _arrived[_c + "_imp"] = _arrived[_c].fillna(_arrived.loc[_is_train, _c].median())
+        _arrived[f"{_p}_is_extreme_cold"] = (_arrived[f"{_p}_temp_imp"] < -15).astype(int)
+        _arrived[f"{_p}_is_freezing"] = _arrived[f"{_p}_temp_imp"].between(-2, 2).astype(int)
+        _arrived[f"{_p}_is_heavy_snow"] = (_arrived[f"{_p}_snow_depth_imp"] > 20).astype(int)
+        _arrived[f"{_p}_temp_x_wind"] = _arrived[f"{_p}_temp_imp"] * _arrived[f"{_p}_wind_imp"]
+        _arrived[f"{_p}_snow_x_wind"] = _arrived[f"{_p}_snow_depth_imp"] * _arrived[f"{_p}_wind_imp"]
 
-    _arrived["is_extreme_cold"] = (_arrived["dest_temp_imp"] < -15).astype(int)
-    _arrived["is_freezing"] = (
-        (_arrived["dest_temp_imp"] >= -2) & (_arrived["dest_temp_imp"] <= 2)
-    ).astype(int)
-    _arrived["is_heavy_snow"] = (_arrived["dest_snow_imp"] > 20).astype(int)
-    _arrived["temp_x_wind"] = _arrived["dest_temp_imp"] * _arrived["dest_wind_imp"]
-    _arrived["snow_x_wind"] = _arrived["dest_snow_imp"] * _arrived["dest_wind_imp"]
+    _route_raw = ["route_min_temp", "route_max_snow_depth", "route_max_wind", "route_max_gust", "route_max_precip_intensity", "route_min_visibility"]
+    for _c in _route_raw:
+        _arrived[_c + "_imp"] = _arrived[_c].fillna(_arrived.loc[_is_train, _c].median())
+    _arrived["route_is_extreme_cold"] = (_arrived["route_min_temp_imp"] < -15).astype(int)
+    _arrived["route_is_heavy_snow"] = (_arrived["route_max_snow_depth_imp"] > 20).astype(int)
 
     _encoded = pd.get_dummies(
         _arrived,
@@ -103,20 +109,25 @@ def _(extract_months, os, pd):
     # one-hot calendar only for linear models, is_winter / is_weekend would be collinear with the dummies
     feat_a_tree = ["departure_hour_local", "day_of_week", "month", "is_winter", "is_weekend"] + _journey + _route_cols
     feat_a_lin = _calendar_onehot + _journey + _route_cols
-    weather_cols = [
-        "dest_temp_imp",
-        "dest_snow_imp",
-        "dest_wind_imp",
-        "dest_precip_imp",
-        "is_extreme_cold",
-        "is_freezing",
-        "is_heavy_snow",
-        "temp_x_wind",
-        "snow_x_wind",
-    ]
-    feat_b_tree = feat_a_tree + weather_cols
-    feat_b_lin = feat_a_lin + weather_cols
-    print("features: A tree", len(feat_a_tree), "| A linear", len(feat_a_lin), "| weather", len(weather_cols))
+    _wx_names = ["temp_imp", "snow_depth_imp", "wind_imp", "precip_intensity_imp", "is_extreme_cold", "is_freezing", "is_heavy_snow", "temp_x_wind", "snow_x_wind", "wx_missing"]
+    _origin_wx = [f"origin_{n}" for n in _wx_names]
+    _dest_wx = [f"dest_{n}" for n in _wx_names]
+    _route_wx = [c + "_imp" for c in _route_raw] + ["route_is_extreme_cold", "route_is_heavy_snow"]
+    weather_groups = {"origin": _origin_wx, "dest": _dest_wx, "route": _route_wx}
+
+    _set_names = {
+        "A": "Set A (Calendar + Route + Journey)",
+        "B": "Set B (+ Destination Weather)",
+        "C": "Set C (+ Origin Weather)",
+        "D": "Set D (+ All Weather)",
+    }
+    _extra = {"A": [], "B": _dest_wx, "C": _origin_wx, "D": _origin_wx + _dest_wx + _route_wx}
+    feature_sets = {
+        "lin": [(_set_names[k], feat_a_lin + _extra[k]) for k in _extra],
+        "tree": [(_set_names[k], feat_a_tree + _extra[k]) for k in _extra],
+    }
+    feat_d_lin = feat_a_lin + _extra["D"]
+    print("features: A tree", len(feat_a_tree), "| A linear", len(feat_a_lin), "| D linear", len(feat_d_lin))
 
     train_df = _encoded[_encoded["year"] < 2024]
     test_df = _encoded[_encoded["year"] == 2024]
@@ -126,13 +137,11 @@ def _(extract_months, os, pd):
     y_test = test_df["delay_minutes"]
     y_test_late = test_df["is_late"].astype(int)
     return (
-        feat_a_lin,
-        feat_a_tree,
-        feat_b_lin,
-        feat_b_tree,
+        feat_d_lin,
+        feature_sets,
         test_df,
         train_df,
-        weather_cols,
+        weather_groups,
         y_test,
         y_test_late,
         y_train,
@@ -144,7 +153,7 @@ def _(
     Lasso,
     Ridge,
     StandardScaler,
-    feat_b_lin,
+    feat_d_lin,
     make_pipeline,
     mean_absolute_error,
     np,
@@ -160,8 +169,8 @@ def _(
     _rows = []
     for _alpha in np.logspace(-1, 6, 8):
         _ridge = make_pipeline(StandardScaler(), Ridge(alpha=_alpha))
-        _ridge.fit(_fit[feat_b_lin], _y_fit)
-        _pred = _ridge.predict(_val[feat_b_lin])
+        _ridge.fit(_fit[feat_d_lin], _y_fit)
+        _pred = _ridge.predict(_val[feat_d_lin])
         _rows.append(
             {
                 "Model": "Ridge",
@@ -174,8 +183,8 @@ def _(
     _lasso_coefs = {}
     for _alpha in np.logspace(-3, 1, 9):
         _lasso = make_pipeline(StandardScaler(), Lasso(alpha=_alpha))
-        _lasso.fit(_fit[feat_b_lin], _y_fit)
-        _pred = _lasso.predict(_val[feat_b_lin])
+        _lasso.fit(_fit[feat_d_lin], _y_fit)
+        _pred = _lasso.predict(_val[feat_d_lin])
         _lasso_coefs[_alpha] = _lasso[-1].coef_
         _rows.append(
             {
@@ -191,7 +200,7 @@ def _(
 
     best_ridge_alpha = float(alpha_df[alpha_df["Model"] == "Ridge"].sort_values("Val RMSE").iloc[0]["alpha"])
     best_lasso_alpha = float(alpha_df[alpha_df["Model"] == "Lasso"].sort_values("Val RMSE").iloc[0]["alpha"])
-    lasso_path = pd.DataFrame(_lasso_coefs, index=feat_b_lin)
+    lasso_path = pd.DataFrame(_lasso_coefs, index=feat_d_lin)
     alpha_df
     return best_lasso_alpha, best_ridge_alpha, lasso_path
 
@@ -206,10 +215,7 @@ def _(
     accuracy_score,
     best_lasso_alpha,
     best_ridge_alpha,
-    feat_a_lin,
-    feat_a_tree,
-    feat_b_lin,
-    feat_b_tree,
+    feature_sets,
     make_pipeline,
     mean_absolute_error,
     np,
@@ -244,10 +250,6 @@ def _(
     ]
     test_preds = {}
 
-    _sets = {
-        "lin": [("Set A (Calendar + Route + Journey)", feat_a_lin), ("Set B (+ Weather)", feat_b_lin)],
-        "tree": [("Set A (Calendar + Route + Journey)", feat_a_tree), ("Set B (+ Weather)", feat_b_tree)],
-    }
     _models = [
         ("Linear Regression (OLS)", make_pipeline(StandardScaler(), LinearRegression()), "lin"),
         (f"Ridge (alpha={best_ridge_alpha:g})", make_pipeline(StandardScaler(), Ridge(alpha=best_ridge_alpha)), "lin"),
@@ -260,7 +262,7 @@ def _(
     ]
 
     for _model_name, _model, _kind in _models:
-        for _f_label, _f_cols in _sets[_kind]:
+        for _f_label, _f_cols in feature_sets[_kind]:
             _reg = _model
             _reg.fit(train_df[_f_cols], y_train)
             _pred = _reg.predict(test_df[_f_cols])
@@ -273,6 +275,22 @@ def _(
 def _(pd, reg_results):
     _results_df = pd.DataFrame(reg_results)
     _results_df.to_csv("outputs/it4b/model_comparison_results.csv", index=False)
+
+    _rows = []
+    for _model_name, _g in _results_df[_results_df["Feature Set"] != "None"].groupby("Model", sort=False):
+        _base = _g[_g["Feature Set"].str.startswith("Set A")].iloc[0]
+        for _, _r in _g[~_g["Feature Set"].str.startswith("Set A")].iterrows():
+            _rows.append(
+                {
+                    "Model": _model_name,
+                    "Compared to Set A": _r["Feature Set"],
+                    "dAUC": round(_r["ROC-AUC"] - _base["ROC-AUC"], 4),
+                    "dMAE": round(_r["MAE"] - _base["MAE"], 4),
+                    "dRMSE": round(_r["RMSE"] - _base["RMSE"], 4),
+                    "dR2": round(_r["R2"] - _base["R2"], 4),
+                }
+            )
+    pd.DataFrame(_rows).to_csv("outputs/it4b/weather_gain_summary.csv", index=False)
     _results_df
     return
 
@@ -285,9 +303,9 @@ def _(np, plt, test_preds, y_test):
 
     _fig, _axes = plt.subplots(1, 2, figsize=(12, 4.5), sharey=True)
     for _ax, (_model_name, _title) in zip(
-        _axes, [("Linear Regression (OLS)", "OLS (Set B)"), ("Random Forest Regressor (depth 8)", "Random Forest (Set B)")]
+        _axes, [("Linear Regression (OLS)", "OLS (Set D)"), ("Random Forest Regressor (depth 8)", "Random Forest (Set D)")]
     ):
-        _fitted = test_preds[(_model_name, "Set B (+ Weather)")][_idx]
+        _fitted = test_preds[(_model_name, "Set D (+ All Weather)")][_idx]
         _ax.scatter(_fitted, _y - _fitted, s=4, alpha=0.15, color="teal")
         _ax.axhline(0, color="red", linestyle="--", linewidth=1)
         _ax.set_title(f"Residuals vs Fitted: {_title}")
@@ -300,22 +318,52 @@ def _(np, plt, test_preds, y_test):
 
 
 @app.cell
-def _(lasso_path, np, plt, weather_cols):
+def _(lasso_path, np, pd, plt, weather_groups):
+    _colors = {"origin": "royalblue", "dest": "seagreen", "route": "firebrick"}
     _fig, _ax = plt.subplots(figsize=(9, 5))
     _alphas = np.array(lasso_path.columns, dtype=float)
     for _feat, _coefs in lasso_path.iterrows():
-        if _feat in weather_cols or _feat in ["scheduled_duration_min", "n_commercial_stops"]:
-            _ax.plot(_alphas, _coefs.to_numpy(), linewidth=2, label=_feat)
+        _group = [g for g, cols in weather_groups.items() if _feat in cols]
+        if _group:
+            _ax.plot(_alphas, _coefs.to_numpy(), linewidth=1.5, color=_colors[_group[0]])
+        elif _feat in ["scheduled_duration_min", "n_commercial_stops"]:
+            _ax.plot(_alphas, _coefs.to_numpy(), linewidth=2, color="black")
         else:
             _ax.plot(_alphas, _coefs.to_numpy(), color="lightgray", linewidth=1)
+    for _g, _c in list(_colors.items()) + [("journey", "black"), ("calendar / route", "lightgray")]:
+        _ax.plot([], [], color=_c, label=_g)
     _ax.set_xscale("log")
     _ax.axhline(0, color="black", linewidth=0.8)
     _ax.set_xlabel("Lasso alpha (log scale)")
     _ax.set_ylabel("Standardized coefficient (min)")
-    _ax.set_title("Lasso Coefficient Path (Set B linear, weather + journey coloured)")
-    _ax.legend(loc="upper left", bbox_to_anchor=(1.01, 1), fontsize=8)
+    _ax.set_title("Lasso Coefficient Path (Set D linear)")
+    _ax.legend(loc="upper left", bbox_to_anchor=(1.01, 1))
     _ax.grid(True, alpha=0.3)
     _fig.savefig("outputs/it4b/lasso_coefficient_path.png", bbox_inches="tight")
+
+    _survive = {}
+    for _feat, _coefs in lasso_path.iterrows():
+        _nonzero = [a for a, c in zip(_alphas, _coefs) if c != 0]
+        _survive[_feat] = max(_nonzero) if _nonzero else 0.0
+    _survive = pd.Series(_survive, name="largest_alpha_nonzero").sort_values(ascending=False)
+    _survive.to_csv("outputs/it4b/lasso_survival.csv")
+    _fig
+    return
+
+
+@app.cell
+def _(plt, train_df, weather_groups):
+    _cols = [c for c in weather_groups["origin"] + weather_groups["dest"] + weather_groups["route"] if c.endswith("_imp")]
+    _corr = train_df[_cols].corr().round(2)
+    _corr.to_csv("outputs/it4b/weather_correlation.csv")
+
+    _fig, _ax = plt.subplots(figsize=(10, 8))
+    _im = _ax.imshow(_corr.values, cmap="coolwarm", vmin=-1, vmax=1)
+    _ax.set_xticks(range(len(_cols)), _cols, rotation=90, fontsize=8)
+    _ax.set_yticks(range(len(_cols)), _cols, fontsize=8)
+    _fig.colorbar(_im)
+    _ax.set_title("Correlation of Weather Features (training years)")
+    _fig.savefig("outputs/it4b/weather_correlation.png", bbox_inches="tight")
     _fig
     return
 

@@ -1,0 +1,13 @@
+Model,Compared to Set A,dAUC,dMAE,dRMSE,dR2
+Linear Regression (OLS),Set B (+ Destination Weather),0.0077,-0.0215,-0.114,0.0153
+Linear Regression (OLS),Set C (+ Origin Weather),0.0148,-0.0397,-0.1239,0.0166
+Linear Regression (OLS),Set D (+ All Weather),0.0137,0.018,-0.2076,0.0278
+Ridge (alpha=100000),Set B (+ Destination Weather),0.0181,-0.0449,-0.1348,0.0181
+Ridge (alpha=100000),Set C (+ Origin Weather),0.0214,-0.0635,-0.1317,0.0177
+Ridge (alpha=100000),Set D (+ All Weather),0.0248,-0.0428,-0.2133,0.0287
+Lasso (alpha=0.1),Set B (+ Destination Weather),0.0239,-0.039,-0.1346,0.0182
+Lasso (alpha=0.1),Set C (+ Origin Weather),0.0279,-0.058,-0.1316,0.0178
+Lasso (alpha=0.1),Set D (+ All Weather),0.0313,-0.0478,-0.1927,0.026
+Random Forest Regressor (depth 8),Set B (+ Destination Weather),0.0115,-0.0132,-0.2033,0.0271
+Random Forest Regressor (depth 8),Set C (+ Origin Weather),0.0145,-0.0212,-0.2301,0.0306
+Random Forest Regressor (depth 8),Set D (+ All Weather),0.0131,-0.0254,-0.3099,0.0411
