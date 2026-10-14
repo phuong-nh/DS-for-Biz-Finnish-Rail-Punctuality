@@ -1,0 +1,15 @@
+,missing_%
+origin_delay,0.26
+prev_stop_delay,31.82
+now_temp,3.61
+now_wind,4.04
+now_gust,4.04
+now_precip_intensity,4.29
+now_snow_depth,4.81
+now_visibility,4.74
+ahead_min_temp,0.15
+ahead_max_snow_depth,0.36
+ahead_max_wind,0.15
+ahead_max_gust,0.15
+ahead_max_precip_intensity,0.32
+ahead_min_visibility,0.28

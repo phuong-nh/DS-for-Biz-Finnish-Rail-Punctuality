@@ -1,0 +1,5 @@
+checkpoint_%,rows,trains,late_rate_%,median_progress,median_remaining_min,mean_current_delay,corr_current_vs_final,AUC_current_delay_only
+0,506574,506574,18.65,0.0,126.0,1.9,0.405,0.6219
+25,507276,507276,18.69,0.172,112.0,2.76,0.498,0.6795
+50,508727,508727,18.76,0.404,84.0,3.28,0.673,0.7535
+75,509031,509031,18.77,0.65,54.0,3.57,0.821,0.8296
