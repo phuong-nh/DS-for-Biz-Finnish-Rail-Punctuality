@@ -20,7 +20,7 @@ def _():
     )
     from sklearn.pipeline import make_pipeline
     from sklearn.preprocessing import StandardScaler
-    from sklearn.tree import DecisionTreeClassifier
+    from sklearn.tree import DecisionTreeClassifier, export_text, plot_tree
 
     from dsforbiz_finnish_rail_punctuality.extract_v2 import extract_months
 
@@ -30,10 +30,12 @@ def _():
         RandomForestClassifier,
         StandardScaler,
         accuracy_score,
+        export_text,
         extract_months,
         make_pipeline,
         os,
         pd,
+        plot_tree,
         plt,
         precision_score,
         recall_score,
@@ -285,6 +287,48 @@ def _(best_model_name, feature_sets, models, pd, score, test_df, train_df):
     test_results = pd.DataFrame(_rows)
     test_results.to_csv("outputs/it5/test_results.csv", index=False)
     test_results
+    return
+
+
+@app.cell
+def _(
+    DecisionTreeClassifier,
+    export_text,
+    feature_sets,
+    pd,
+    plot_tree,
+    plt,
+    roc_auc_score,
+    test_df,
+    train_df,
+):
+    # small unweighted tree so each leaf shows the real share of late trains, Set C = known at departure
+    _label, _cols = feature_sets["tree"][2]
+    _tree = DecisionTreeClassifier(max_depth=3, min_samples_leaf=200, random_state=42)
+    _tree.fit(train_df[_cols], train_df["is_late"].astype(int))
+    _auc = roc_auc_score(test_df["is_late"].astype(int), _tree.predict_proba(test_df[_cols])[:, 1])
+    pd.DataFrame([{"tree": "depth 3, leaf 200, unweighted", "Feature Set": _label, "test ROC-AUC": round(float(_auc), 4)}]).to_csv(
+        "outputs/it5/tree_rules_summary.csv", index=False
+    )
+
+    with open("outputs/it5/tree_rules.txt", "w") as _f:
+        _f.write(export_text(_tree, feature_names=list(_cols), show_weights=True))
+
+    _fig, _ax = plt.subplots(figsize=(22, 8))
+    plot_tree(
+        _tree,
+        feature_names=list(_cols),
+        class_names=["on time", "late"],
+        filled=True,
+        proportion=True,
+        impurity=False,
+        rounded=True,
+        fontsize=9,
+        ax=_ax,
+    )
+    _ax.set_title(f"Depth-3 decision tree, {_label}, trained 2018-2023 (test AUC {_auc:.3f})")
+    _fig.savefig("outputs/it5/tree_rules.png", bbox_inches="tight", dpi=120)
+    _fig
     return
 
 
