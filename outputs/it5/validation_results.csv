@@ -11,3 +11,7 @@ Logistic Regression (Balanced),Set D (+ All Weather),0.6294,0.5213,0.2045,0.6845
 "Random Forest (depth 16, leaf 1, Balanced)",Set B (+ Destination Weather),0.6328,0.6344,0.2233,0.5141
 "Random Forest (depth 16, leaf 1, Balanced)",Set C (+ Origin Weather),0.6357,0.6366,0.2264,0.5219
 "Random Forest (depth 16, leaf 1, Balanced)",Set D (+ All Weather),0.6383,0.6419,0.2263,0.5075
+"Gradient Boosting (HistGB, Balanced)",Set A (Calendar + Route + Journey),0.6294,0.6465,0.2291,0.5074
+"Gradient Boosting (HistGB, Balanced)",Set B (+ Destination Weather),0.6418,0.6621,0.2383,0.5016
+"Gradient Boosting (HistGB, Balanced)",Set C (+ Origin Weather),0.6439,0.6624,0.2396,0.5062
+"Gradient Boosting (HistGB, Balanced)",Set D (+ All Weather),0.6503,0.662,0.2411,0.5137

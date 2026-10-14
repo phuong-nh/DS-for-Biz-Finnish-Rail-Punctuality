@@ -10,7 +10,7 @@ def _():
 
     import matplotlib.pyplot as plt
     import pandas as pd
-    from sklearn.ensemble import RandomForestClassifier
+    from sklearn.ensemble import HistGradientBoostingClassifier, RandomForestClassifier
     from sklearn.linear_model import LogisticRegression
     from sklearn.metrics import (
         accuracy_score,
@@ -26,6 +26,7 @@ def _():
 
     return (
         DecisionTreeClassifier,
+        HistGradientBoostingClassifier,
         LogisticRegression,
         RandomForestClassifier,
         StandardScaler,
@@ -189,6 +190,49 @@ def _(
 
 
 @app.cell
+def _(
+    HistGradientBoostingClassifier,
+    feature_sets,
+    fit_df,
+    pd,
+    roc_auc_score,
+    val_df,
+):
+    _cols = feature_sets["tree"][-1][1]
+    _y_fit = fit_df["is_late"].astype(int)
+    _y_val = val_df["is_late"].astype(int)
+
+    _rows = []
+    for _lr in [0.05, 0.1]:
+        for _iters in [200, 500]:
+            for _leaves in [31, 63]:
+                _hgb = HistGradientBoostingClassifier(
+                    learning_rate=_lr,
+                    max_iter=_iters,
+                    max_leaf_nodes=_leaves,
+                    class_weight="balanced",
+                    early_stopping=False,
+                    random_state=42,
+                )
+                _hgb.fit(fit_df[_cols], _y_fit)
+                _rows.append(
+                    {
+                        "learning_rate": _lr,
+                        "max_iter": _iters,
+                        "max_leaf_nodes": _leaves,
+                        "train AUC": round(float(roc_auc_score(_y_fit, _hgb.predict_proba(fit_df[_cols])[:, 1])), 4),
+                        "val AUC": round(float(roc_auc_score(_y_val, _hgb.predict_proba(val_df[_cols])[:, 1])), 4),
+                    }
+                )
+    hgb_tuning = pd.DataFrame(_rows).sort_values("val AUC", ascending=False)
+    hgb_tuning.to_csv("outputs/it5/hgb_tuning.csv", index=False)
+    best_hgb = hgb_tuning.iloc[0]
+    print("best HistGB:", dict(best_hgb))
+    hgb_tuning
+    return (best_hgb,)
+
+
+@app.cell
 def _(plt, tuning):
     _fig, _axes = plt.subplots(1, 2, figsize=(13, 4.5), sharey=True)
     for _ax, _model in zip(_axes, ["Decision Tree", "Random Forest"]):
@@ -210,10 +254,12 @@ def _(plt, tuning):
 @app.cell
 def _(
     DecisionTreeClassifier,
+    HistGradientBoostingClassifier,
     LogisticRegression,
     RandomForestClassifier,
     StandardScaler,
     best_dt,
+    best_hgb,
     best_rf,
     make_pipeline,
 ):
@@ -236,6 +282,17 @@ def _(
                 class_weight="balanced",
                 random_state=42,
                 n_jobs=-1,
+            ),
+            "tree",
+        ),
+        "Gradient Boosting (HistGB, Balanced)": (
+            HistGradientBoostingClassifier(
+                learning_rate=float(best_hgb["learning_rate"]),
+                max_iter=int(best_hgb["max_iter"]),
+                max_leaf_nodes=int(best_hgb["max_leaf_nodes"]),
+                class_weight="balanced",
+                early_stopping=False,
+                random_state=42,
             ),
             "tree",
         ),
