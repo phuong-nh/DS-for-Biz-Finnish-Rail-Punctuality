@@ -9,6 +9,7 @@ def _():
     import os
 
     import matplotlib.pyplot as plt
+    import numpy as np
     import pandas as pd
     from sklearn.ensemble import HistGradientBoostingClassifier, RandomForestClassifier
     from sklearn.linear_model import LogisticRegression
@@ -17,6 +18,7 @@ def _():
         precision_score,
         recall_score,
         roc_auc_score,
+        roc_curve,
     )
     from sklearn.pipeline import make_pipeline
     from sklearn.preprocessing import StandardScaler
@@ -34,6 +36,7 @@ def _():
         export_text,
         extract_months,
         make_pipeline,
+        np,
         os,
         pd,
         plot_tree,
@@ -41,6 +44,7 @@ def _():
         precision_score,
         recall_score,
         roc_auc_score,
+        roc_curve,
     )
 
 
@@ -337,14 +341,22 @@ def _(feature_sets, fit_df, models, pd, score, val_df):
 def _(best_model_name, feature_sets, models, pd, score, test_df, train_df):
     _model, _kind = models[best_model_name]
     _rows = []
+    test_probs = {}
     for _f_label, _f_cols in feature_sets[_kind]:
         _model.fit(train_df[_f_cols], train_df["is_late"].astype(int))
         _probs = _model.predict_proba(test_df[_f_cols])[:, 1]
+        test_probs[_f_label] = _probs
         _rows.append(score(best_model_name, _f_label, test_df["is_late"].astype(int), _probs))
     test_results = pd.DataFrame(_rows)
     test_results.to_csv("outputs/it5/test_results.csv", index=False)
+
+    # save the 2024 probabilities so later notebooks don't need to refit
+    _probs_df = pd.DataFrame({"departure_date": test_df["departure_date"].to_numpy(), "is_late": test_df["is_late"].astype(int).to_numpy()})
+    for _i, _label in enumerate(test_probs):
+        _probs_df[f"prob_set_{'ABCD'[_i]}"] = test_probs[_label]
+    _probs_df.to_csv("outputs/it5/test_probabilities.csv", index=False)
     test_results
-    return
+    return (test_probs,)
 
 
 @app.cell
@@ -396,6 +408,26 @@ def _(
     )
     _ax.set_title(f"Depth-3 decision tree (balanced), {_label}, trained 2018-2023 (test AUC {_auc:.3f}) - real late rates in tree_leaf_rates.csv")
     _fig.savefig("outputs/it5/tree_rules.png", bbox_inches="tight", dpi=120)
+    _fig
+    return
+
+
+@app.cell
+def _(best_model_name, np, plt, roc_auc_score, roc_curve, test_df, test_probs):
+    _y = test_df["is_late"].astype(int)
+    _fig, _ax = plt.subplots(figsize=(7, 6))
+    for (_label, _probs), _color in zip(test_probs.items(), ["gray", "seagreen", "royalblue", "firebrick"]):
+        _fpr, _tpr, _thr = roc_curve(_y, _probs)
+        _ax.plot(_fpr, _tpr, color=_color, label=f"{_label} (AUC {roc_auc_score(_y, _probs):.3f})")
+        _i = int(np.argmin(np.abs(_thr - 0.5)))
+        _ax.plot(_fpr[_i], _tpr[_i], "o", color=_color)
+    _ax.plot([0, 1], [0, 1], "k--", linewidth=1, label="random (AUC 0.5)")
+    _ax.set_xlabel("False positive rate (on-time trains flagged)")
+    _ax.set_ylabel("True positive rate (late trains caught)")
+    _ax.set_title(f"ROC on 2024 test: {best_model_name}\n(dots = default threshold 0.5)")
+    _ax.legend(loc="lower right", fontsize=8)
+    _ax.grid(True, alpha=0.3)
+    _fig.savefig("outputs/it5/roc_curves_sets.png", bbox_inches="tight")
     _fig
     return
 
