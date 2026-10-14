@@ -1,22 +1,22 @@
-|--- scheduled_duration_min <= 132.50
-|   |--- scheduled_duration_min <= 96.50
-|   |   |--- n_commercial_stops <= 4.50
-|   |   |   |--- weights: [17215.00, 3559.00] class: 0
-|   |   |--- n_commercial_stops >  4.50
-|   |   |   |--- weights: [80655.00, 7616.00] class: 0
-|   |--- scheduled_duration_min >  96.50
-|   |   |--- departure_hour_local <= 15.50
-|   |   |   |--- weights: [69526.00, 11085.00] class: 0
-|   |   |--- departure_hour_local >  15.50
-|   |   |   |--- weights: [40425.00, 10421.00] class: 0
-|--- scheduled_duration_min >  132.50
-|   |--- origin_temp_x_wind <= -14.01
+|--- scheduled_duration_min <= 106.50
+|   |--- n_commercial_stops <= 4.50
+|   |   |--- corridor_clean_HKI-TKU <= 0.50
+|   |   |   |--- class: 0
+|   |   |--- corridor_clean_HKI-TKU >  0.50
+|   |   |   |--- class: 1
+|   |--- n_commercial_stops >  4.50
+|   |   |--- corridor_clean_SL-PAR <= 0.50
+|   |   |   |--- class: 0
+|   |   |--- corridor_clean_SL-PAR >  0.50
+|   |   |   |--- class: 0
+|--- scheduled_duration_min >  106.50
+|   |--- origin_temp_x_wind <= -6.47
 |   |   |--- train_type_HDM <= 0.50
-|   |   |   |--- weights: [14559.00, 8728.00] class: 0
+|   |   |   |--- class: 1
 |   |   |--- train_type_HDM >  0.50
-|   |   |   |--- weights: [1139.00, 144.00] class: 0
-|   |--- origin_temp_x_wind >  -14.01
-|   |   |--- corridor_clean_JNS-HKI <= 0.50
-|   |   |   |--- weights: [133452.00, 35311.00] class: 0
-|   |   |--- corridor_clean_JNS-HKI >  0.50
-|   |   |   |--- weights: [5758.00, 3192.00] class: 0
+|   |   |   |--- class: 0
+|   |--- origin_temp_x_wind >  -6.47
+|   |   |--- train_type_HDM <= 0.50
+|   |   |   |--- class: 1
+|   |   |--- train_type_HDM >  0.50
+|   |   |   |--- class: 0

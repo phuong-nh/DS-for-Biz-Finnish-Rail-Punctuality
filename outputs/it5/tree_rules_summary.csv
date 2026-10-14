@@ -1,2 +1,2 @@
 tree,Feature Set,test ROC-AUC
-"depth 3, leaf 200, unweighted",Set C (+ Origin Weather),0.6758
+"depth 3, leaf 200, balanced",Set C (+ Origin Weather),0.6509

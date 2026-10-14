@@ -302,17 +302,28 @@ def _(
     test_df,
     train_df,
 ):
-    # small unweighted tree so each leaf shows the real share of late trains, Set C = known at departure
+    # unweighted version only predicted "on time" in every leaf (no leaf has > 50% late), so balanced like the others
     _label, _cols = feature_sets["tree"][2]
-    _tree = DecisionTreeClassifier(max_depth=3, min_samples_leaf=200, random_state=42)
+    _tree = DecisionTreeClassifier(max_depth=3, min_samples_leaf=200, class_weight="balanced", random_state=42)
     _tree.fit(train_df[_cols], train_df["is_late"].astype(int))
     _auc = roc_auc_score(test_df["is_late"].astype(int), _tree.predict_proba(test_df[_cols])[:, 1])
-    pd.DataFrame([{"tree": "depth 3, leaf 200, unweighted", "Feature Set": _label, "test ROC-AUC": round(float(_auc), 4)}]).to_csv(
+    pd.DataFrame([{"tree": "depth 3, leaf 200, balanced", "Feature Set": _label, "test ROC-AUC": round(float(_auc), 4)}]).to_csv(
         "outputs/it5/tree_rules_summary.csv", index=False
     )
 
     with open("outputs/it5/tree_rules.txt", "w") as _f:
-        _f.write(export_text(_tree, feature_names=list(_cols), show_weights=True))
+        _f.write(export_text(_tree, feature_names=list(_cols)))
+
+    # the plot shows re-weighted proportions, so save the real late rate per leaf too
+    _train_leaf = pd.DataFrame({"leaf": _tree.apply(train_df[_cols]), "late": train_df["is_late"].astype(int).to_numpy()})
+    _test_leaf = pd.DataFrame({"leaf": _tree.apply(test_df[_cols]), "late": test_df["is_late"].astype(int).to_numpy()})
+    _leaf_rates = _train_leaf.groupby("leaf").agg(n_train=("late", "size"), late_rate_train=("late", "mean"))
+    _leaf_rates["late_rate_test"] = _test_leaf.groupby("leaf")["late"].mean()
+    _leaf_rates["n_test"] = _test_leaf.groupby("leaf")["late"].size()
+    _leaf_rates["predicted"] = ["late" if _tree.tree_.value[i][0][1] > _tree.tree_.value[i][0][0] else "on time" for i in _leaf_rates.index]
+    _leaf_rates = _leaf_rates.round(3).sort_values("late_rate_train", ascending=False)
+    _leaf_rates.to_csv("outputs/it5/tree_leaf_rates.csv")
+    print(_leaf_rates)
 
     _fig, _ax = plt.subplots(figsize=(22, 8))
     plot_tree(
@@ -326,7 +337,7 @@ def _(
         fontsize=9,
         ax=_ax,
     )
-    _ax.set_title(f"Depth-3 decision tree, {_label}, trained 2018-2023 (test AUC {_auc:.3f})")
+    _ax.set_title(f"Depth-3 decision tree (balanced), {_label}, trained 2018-2023 (test AUC {_auc:.3f}) - real late rates in tree_leaf_rates.csv")
     _fig.savefig("outputs/it5/tree_rules.png", bbox_inches="tight", dpi=120)
     _fig
     return
