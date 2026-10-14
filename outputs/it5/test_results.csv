@@ -1,5 +1,5 @@
 Model,Feature Set,ROC-AUC,Accuracy,Precision,Recall
-"Random Forest (depth 8, Balanced)",Set A (Calendar + Route + Journey),0.6927,0.5797,0.3252,0.7429
-"Random Forest (depth 8, Balanced)",Set B (+ Destination Weather),0.7029,0.5872,0.3312,0.7519
-"Random Forest (depth 8, Balanced)",Set C (+ Origin Weather),0.71,0.6,0.3383,0.7448
-"Random Forest (depth 8, Balanced)",Set D (+ All Weather),0.7045,0.5958,0.3328,0.7267
+"Random Forest (depth 16, leaf 1, Balanced)",Set A (Calendar + Route + Journey),0.6681,0.6492,0.3471,0.5693
+"Random Forest (depth 16, leaf 1, Balanced)",Set B (+ Destination Weather),0.6924,0.6512,0.3557,0.6077
+"Random Forest (depth 16, leaf 1, Balanced)",Set C (+ Origin Weather),0.6981,0.6549,0.3595,0.6104
+"Random Forest (depth 16, leaf 1, Balanced)",Set D (+ All Weather),0.6955,0.6538,0.3565,0.5981

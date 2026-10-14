@@ -8,6 +8,7 @@ app = marimo.App(width="medium")
 def _():
     import os
 
+    import matplotlib.pyplot as plt
     import pandas as pd
     from sklearn.ensemble import RandomForestClassifier
     from sklearn.linear_model import LogisticRegression
@@ -33,6 +34,7 @@ def _():
         make_pipeline,
         os,
         pd,
+        plt,
         precision_score,
         recall_score,
         roc_auc_score,
@@ -132,22 +134,107 @@ def _(extract_months, os, pd):
 @app.cell
 def _(
     DecisionTreeClassifier,
+    RandomForestClassifier,
+    feature_sets,
+    fit_df,
+    pd,
+    roc_auc_score,
+    val_df,
+):
+    _cols = feature_sets["tree"][-1][1]
+    _y_fit = fit_df["is_late"].astype(int)
+    _y_val = val_df["is_late"].astype(int)
+
+    _rows = []
+    for _depth in [2, 3, 4, 5, 6, 8, 10, 12, 15, 20]:
+        for _leaf in [1, 200]:
+            _dt = DecisionTreeClassifier(max_depth=_depth, min_samples_leaf=_leaf, class_weight="balanced", random_state=42)
+            _dt.fit(fit_df[_cols], _y_fit)
+            _rows.append(
+                {
+                    "model": "Decision Tree",
+                    "max_depth": _depth,
+                    "min_samples_leaf": _leaf,
+                    "train AUC": round(float(roc_auc_score(_y_fit, _dt.predict_proba(fit_df[_cols])[:, 1])), 4),
+                    "val AUC": round(float(roc_auc_score(_y_val, _dt.predict_proba(val_df[_cols])[:, 1])), 4),
+                }
+            )
+    # 50 trees instead of 100 to keep the tuning time ok
+    for _depth in [4, 6, 8, 10, 12, 16]:
+        for _leaf in [1, 200]:
+            _rf = RandomForestClassifier(
+                n_estimators=50, max_depth=_depth, min_samples_leaf=_leaf, class_weight="balanced", random_state=42, n_jobs=-1
+            )
+            _rf.fit(fit_df[_cols], _y_fit)
+            _rows.append(
+                {
+                    "model": "Random Forest",
+                    "max_depth": _depth,
+                    "min_samples_leaf": _leaf,
+                    "train AUC": round(float(roc_auc_score(_y_fit, _rf.predict_proba(fit_df[_cols])[:, 1])), 4),
+                    "val AUC": round(float(roc_auc_score(_y_val, _rf.predict_proba(val_df[_cols])[:, 1])), 4),
+                }
+            )
+    tuning = pd.DataFrame(_rows)
+    tuning.to_csv("outputs/it5/tree_tuning.csv", index=False)
+
+    best_dt = tuning[tuning["model"] == "Decision Tree"].sort_values("val AUC", ascending=False).iloc[0]
+    best_rf = tuning[tuning["model"] == "Random Forest"].sort_values("val AUC", ascending=False).iloc[0]
+    print("best DT:", dict(best_dt))
+    print("best RF:", dict(best_rf))
+    tuning
+    return best_dt, best_rf, tuning
+
+
+@app.cell
+def _(plt, tuning):
+    _fig, _axes = plt.subplots(1, 2, figsize=(13, 4.5), sharey=True)
+    for _ax, _model in zip(_axes, ["Decision Tree", "Random Forest"]):
+        _t = tuning[tuning["model"] == _model]
+        for _leaf, _style in [(1, "-"), (200, "--")]:
+            _tl = _t[_t["min_samples_leaf"] == _leaf]
+            _ax.plot(_tl["max_depth"], _tl["train AUC"], _style, color="steelblue", marker="o", label=f"train (2018-22), leaf={_leaf}")
+            _ax.plot(_tl["max_depth"], _tl["val AUC"], _style, color="darkorange", marker="o", label=f"validation (2023), leaf={_leaf}")
+        _ax.set_title(f"{_model}: train vs validation AUC (Set D)")
+        _ax.set_xlabel("max_depth")
+        _ax.grid(True, alpha=0.3)
+    _axes[0].set_ylabel("ROC-AUC")
+    _axes[1].legend(loc="upper left", fontsize=8)
+    _fig.savefig("outputs/it5/bias_variance_depth.png", bbox_inches="tight")
+    _fig
+    return
+
+
+@app.cell
+def _(
+    DecisionTreeClassifier,
     LogisticRegression,
     RandomForestClassifier,
     StandardScaler,
+    best_dt,
+    best_rf,
     make_pipeline,
 ):
+    _dt_depth, _dt_leaf = int(best_dt["max_depth"]), int(best_dt["min_samples_leaf"])
+    _rf_depth, _rf_leaf = int(best_rf["max_depth"]), int(best_rf["min_samples_leaf"])
     models = {
         "Logistic Regression (Balanced)": (
             make_pipeline(StandardScaler(), LogisticRegression(max_iter=1000, class_weight="balanced")),
             "lin",
         ),
-        "Decision Tree (depth 5, Balanced)": (
-            DecisionTreeClassifier(max_depth=5, class_weight="balanced", random_state=42),
+        f"Decision Tree (depth {_dt_depth}, leaf {_dt_leaf}, Balanced)": (
+            DecisionTreeClassifier(max_depth=_dt_depth, min_samples_leaf=_dt_leaf, class_weight="balanced", random_state=42),
             "tree",
         ),
-        "Random Forest (depth 8, Balanced)": (
-            RandomForestClassifier(n_estimators=100, max_depth=8, class_weight="balanced", random_state=42, n_jobs=-1),
+        f"Random Forest (depth {_rf_depth}, leaf {_rf_leaf}, Balanced)": (
+            RandomForestClassifier(
+                n_estimators=100,
+                max_depth=_rf_depth,
+                min_samples_leaf=_rf_leaf,
+                class_weight="balanced",
+                random_state=42,
+                n_jobs=-1,
+            ),
             "tree",
         ),
     }
