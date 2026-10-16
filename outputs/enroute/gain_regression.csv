@@ -1,0 +1,9 @@
+checkpoint_%,Model,dMAE E1-E0 (context),dMAE E2-E1 (weather),dR2 E1-E0 (context),dR2 E2-E1 (weather)
+0,Gradient Boosting (HistGB),-0.4612,-0.0185,0.0625,0.0234
+0,Linear Regression (OLS),-0.304,0.0094,0.0393,0.0118
+25,Gradient Boosting (HistGB),-0.4357,0.0125,0.0548,0.0175
+25,Linear Regression (OLS),-0.1947,0.0191,0.0217,0.0079
+50,Gradient Boosting (HistGB),-0.2779,0.0246,0.0253,0.0072
+50,Linear Regression (OLS),-0.0549,0.0208,0.0077,0.0035
+75,Gradient Boosting (HistGB),-0.328,0.0134,0.0209,0.0024
+75,Linear Regression (OLS),-0.1555,0.0081,0.008,0.0009

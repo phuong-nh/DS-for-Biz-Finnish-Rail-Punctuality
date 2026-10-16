@@ -1,0 +1,29 @@
+checkpoint_%,Model,Set,MAE,RMSE,R2
+0,Persistence (final = current),-,5.1298,13.1454,0.1732
+0,Linear Regression (OLS),E0,5.3617,12.9697,0.1952
+0,Linear Regression (OLS),E1,5.0577,12.6489,0.2345
+0,Linear Regression (OLS),E2,5.0671,12.5514,0.2463
+0,Gradient Boosting (HistGB),E0,5.3117,12.9391,0.199
+0,Gradient Boosting (HistGB),E1,4.8505,12.4241,0.2615
+0,Gradient Boosting (HistGB),E2,4.832,12.2258,0.2849
+25,Persistence (final = current),-,4.977,12.1371,0.3009
+25,Linear Regression (OLS),E0,5.0845,12.08,0.3074
+25,Linear Regression (OLS),E1,4.8898,11.8895,0.3291
+25,Linear Regression (OLS),E2,4.9089,11.8195,0.337
+25,Gradient Boosting (HistGB),E0,5.0136,12.0938,0.3058
+25,Gradient Boosting (HistGB),E1,4.5779,11.6072,0.3606
+25,Gradient Boosting (HistGB),E2,4.5904,11.4472,0.3781
+50,Persistence (final = current),-,4.3199,10.0238,0.523
+50,Linear Regression (OLS),E0,4.2969,10.0219,0.5232
+50,Linear Regression (OLS),E1,4.242,9.9412,0.5309
+50,Linear Regression (OLS),E2,4.2628,9.9035,0.5344
+50,Gradient Boosting (HistGB),E0,4.247,9.9943,0.5259
+50,Gradient Boosting (HistGB),E1,3.9691,9.7233,0.5512
+50,Gradient Boosting (HistGB),E2,3.9937,9.6457,0.5584
+75,Persistence (final = current),-,3.4245,7.2788,0.7489
+75,Linear Regression (OLS),E0,3.3895,7.2874,0.7483
+75,Linear Regression (OLS),E1,3.234,7.1705,0.7563
+75,Linear Regression (OLS),E2,3.2421,7.1585,0.7572
+75,Gradient Boosting (HistGB),E0,3.3273,7.2707,0.7495
+75,Gradient Boosting (HistGB),E1,2.9993,6.9607,0.7704
+75,Gradient Boosting (HistGB),E2,3.0127,6.924,0.7728
