@@ -1,0 +1,29 @@
+checkpoint_%,Model,Set,ROC-AUC
+0,Logistic Regression (Balanced),E0,0.5945
+0,Logistic Regression (Balanced),E1,0.748
+0,Logistic Regression (Balanced),E2,0.7556
+0,"Gradient Boosting (HistGB, tuned)",E0,0.5946
+0,"Gradient Boosting (HistGB, tuned)",E1,0.7638
+0,"Gradient Boosting (HistGB, tuned)",E2,0.7743
+25,Logistic Regression (Balanced),E0,0.6766
+25,Logistic Regression (Balanced),E1,0.7652
+25,Logistic Regression (Balanced),E2,0.7672
+25,"Gradient Boosting (HistGB, tuned)",E0,0.6769
+25,"Gradient Boosting (HistGB, tuned)",E1,0.7812
+25,"Gradient Boosting (HistGB, tuned)",E2,0.79
+50,Logistic Regression (Balanced),E0,0.7622
+50,Logistic Regression (Balanced),E1,0.8012
+50,Logistic Regression (Balanced),E2,0.8017
+50,"Gradient Boosting (HistGB, tuned)",E0,0.7626
+50,"Gradient Boosting (HistGB, tuned)",E1,0.8224
+50,"Gradient Boosting (HistGB, tuned)",E2,0.826
+75,Logistic Regression (Balanced),E0,0.8251
+75,Logistic Regression (Balanced),E1,0.8524
+75,Logistic Regression (Balanced),E2,0.852
+75,"Gradient Boosting (HistGB, tuned)",E0,0.8251
+75,"Gradient Boosting (HistGB, tuned)",E1,0.8709
+75,"Gradient Boosting (HistGB, tuned)",E2,0.8698
+0,"Gradient Boosting (HistGB, tuned, pooled)",E2,0.7701
+25,"Gradient Boosting (HistGB, tuned, pooled)",E2,0.7896
+50,"Gradient Boosting (HistGB, tuned, pooled)",E2,0.8251
+75,"Gradient Boosting (HistGB, tuned, pooled)",E2,0.8704

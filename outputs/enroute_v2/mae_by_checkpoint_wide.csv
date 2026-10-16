@@ -1,0 +1,5 @@
+checkpoint_%,"Gradient Boosting (HistGB, absolute loss) E1","Gradient Boosting (HistGB, absolute loss) E2","Gradient Boosting (HistGB, squared loss) E0","Gradient Boosting (HistGB, squared loss) E1","Gradient Boosting (HistGB, squared loss) E2",Linear Regression (OLS) E1,Linear Regression (OLS) E2,Persistence (final = current) -
+0,4.6412,4.5995,5.3117,4.8096,4.793,5.0336,5.0449,5.1298
+25,4.3942,4.3578,5.0136,4.5512,4.5415,4.8661,4.8834,4.977
+50,3.8526,3.8453,4.247,3.9449,3.9497,4.2524,4.2649,4.3199
+75,3.0,2.986,3.3273,3.0055,3.0133,3.2478,3.2528,3.4245
