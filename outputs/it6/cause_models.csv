@@ -1,0 +1,25 @@
+target,Model,Feature Set,positive_rate_train_%,positive_rate_test_%,ROC-AUC
+is_late,"Gradient Boosting (HistGB, Balanced)",Set A (Calendar + Route + Journey),18.08,23.37,0.6748
+is_late,"Gradient Boosting (HistGB, Balanced)",Set C (+ Origin Weather),18.08,23.37,0.6966
+is_late,"Gradient Boosting (HistGB, Balanced)",Set D (+ All Weather),18.08,23.37,0.7007
+is_late,Logistic Regression (Balanced),Set A (Calendar + Route + Journey),18.08,23.37,0.6599
+is_late,Logistic Regression (Balanced),Set C (+ Origin Weather),18.08,23.37,0.6795
+is_late,Logistic Regression (Balanced),Set D (+ All Weather),18.08,23.37,0.683
+late_infra,"Gradient Boosting (HistGB, Balanced)",Set A (Calendar + Route + Journey),4.97,6.04,0.6406
+late_infra,"Gradient Boosting (HistGB, Balanced)",Set C (+ Origin Weather),4.97,6.04,0.6357
+late_infra,"Gradient Boosting (HistGB, Balanced)",Set D (+ All Weather),4.97,6.04,0.6368
+late_infra,Logistic Regression (Balanced),Set A (Calendar + Route + Journey),4.97,6.04,0.6349
+late_infra,Logistic Regression (Balanced),Set C (+ Origin Weather),4.97,6.04,0.6512
+late_infra,Logistic Regression (Balanced),Set D (+ All Weather),4.97,6.04,0.6612
+late_operator,"Gradient Boosting (HistGB, Balanced)",Set A (Calendar + Route + Journey),3.44,3.98,0.7297
+late_operator,"Gradient Boosting (HistGB, Balanced)",Set C (+ Origin Weather),3.44,3.98,0.7279
+late_operator,"Gradient Boosting (HistGB, Balanced)",Set D (+ All Weather),3.44,3.98,0.726
+late_operator,Logistic Regression (Balanced),Set A (Calendar + Route + Journey),3.44,3.98,0.7315
+late_operator,Logistic Regression (Balanced),Set C (+ Origin Weather),3.44,3.98,0.7372
+late_operator,Logistic Regression (Balanced),Set D (+ All Weather),3.44,3.98,0.7392
+late_traffic,"Gradient Boosting (HistGB, Balanced)",Set A (Calendar + Route + Journey),9.08,12.75,0.6492
+late_traffic,"Gradient Boosting (HistGB, Balanced)",Set C (+ Origin Weather),9.08,12.75,0.667
+late_traffic,"Gradient Boosting (HistGB, Balanced)",Set D (+ All Weather),9.08,12.75,0.6641
+late_traffic,Logistic Regression (Balanced),Set A (Calendar + Route + Journey),9.08,12.75,0.6166
+late_traffic,Logistic Regression (Balanced),Set C (+ Origin Weather),9.08,12.75,0.6371
+late_traffic,Logistic Regression (Balanced),Set D (+ All Weather),9.08,12.75,0.6381

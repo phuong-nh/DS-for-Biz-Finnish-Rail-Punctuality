@@ -1,0 +1,5 @@
+target,events_2018_2023,share_from_top10pct_train_numbers_%,share_of_trips_in_those_trains_%
+is_late,80056,40.32,25.89
+late_infra,21987,44.12,24.75
+late_operator,15235,49.73,24.85
+late_traffic,40219,41.72,25.04
