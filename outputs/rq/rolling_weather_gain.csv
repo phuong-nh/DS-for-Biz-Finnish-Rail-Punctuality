@@ -1,0 +1,9 @@
+test year,Model,test late rate %,AUC Set A,dAUC C-A (origin weather),dAUC D-A (all weather)
+2021,"Gradient Boosting (HistGB, Balanced)",13.49,0.6262,0.0187,0.0242
+2021,Logistic Regression (Balanced),13.49,0.6296,0.0082,0.0193
+2022,"Gradient Boosting (HistGB, Balanced)",18.34,0.6551,0.0072,0.0109
+2022,Logistic Regression (Balanced),18.34,0.6323,0.0022,0.0116
+2023,"Gradient Boosting (HistGB, Balanced)",16.07,0.6294,0.0145,0.0209
+2023,Logistic Regression (Balanced),16.07,0.6133,0.0115,0.0161
+2024,"Gradient Boosting (HistGB, Balanced)",23.37,0.6748,0.0218,0.0259
+2024,Logistic Regression (Balanced),23.37,0.6599,0.0196,0.0231

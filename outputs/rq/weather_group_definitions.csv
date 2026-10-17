@@ -1,0 +1,7 @@
+group,features
+temperature,"origin_temp_imp, origin_is_extreme_cold, origin_is_freezing, origin_temp_x_wind, dest_temp_imp, dest_is_extreme_cold, dest_is_freezing, dest_temp_x_wind, route_min_temp_imp, route_is_extreme_cold"
+snow,"origin_snow_depth_imp, origin_is_heavy_snow, origin_snow_x_wind, dest_snow_depth_imp, dest_is_heavy_snow, dest_snow_x_wind, route_max_snow_depth_imp, route_is_heavy_snow"
+wind,"origin_wind_imp, dest_wind_imp, route_max_wind_imp, route_max_gust_imp"
+precipitation,"origin_precip_intensity_imp, dest_precip_intensity_imp, route_max_precip_intensity_imp"
+missing flags,"origin_wx_missing, dest_wx_missing"
+visibility,route_min_visibility_imp

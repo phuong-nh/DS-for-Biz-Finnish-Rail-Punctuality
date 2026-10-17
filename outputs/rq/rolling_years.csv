@@ -1,0 +1,25 @@
+test year,train years,test late rate %,Model,Feature Set,ROC-AUC
+2021,2018-2020,13.49,"Gradient Boosting (HistGB, Balanced)",Set A (Calendar + Route + Journey),0.6262
+2021,2018-2020,13.49,"Gradient Boosting (HistGB, Balanced)",Set C (+ Origin Weather),0.6449
+2021,2018-2020,13.49,"Gradient Boosting (HistGB, Balanced)",Set D (+ All Weather),0.6504
+2021,2018-2020,13.49,Logistic Regression (Balanced),Set A (Calendar + Route + Journey),0.6296
+2021,2018-2020,13.49,Logistic Regression (Balanced),Set C (+ Origin Weather),0.6378
+2021,2018-2020,13.49,Logistic Regression (Balanced),Set D (+ All Weather),0.6489
+2022,2018-2021,18.34,"Gradient Boosting (HistGB, Balanced)",Set A (Calendar + Route + Journey),0.6551
+2022,2018-2021,18.34,"Gradient Boosting (HistGB, Balanced)",Set C (+ Origin Weather),0.6623
+2022,2018-2021,18.34,"Gradient Boosting (HistGB, Balanced)",Set D (+ All Weather),0.666
+2022,2018-2021,18.34,Logistic Regression (Balanced),Set A (Calendar + Route + Journey),0.6323
+2022,2018-2021,18.34,Logistic Regression (Balanced),Set C (+ Origin Weather),0.6345
+2022,2018-2021,18.34,Logistic Regression (Balanced),Set D (+ All Weather),0.6439
+2023,2018-2022,16.07,"Gradient Boosting (HistGB, Balanced)",Set A (Calendar + Route + Journey),0.6294
+2023,2018-2022,16.07,"Gradient Boosting (HistGB, Balanced)",Set C (+ Origin Weather),0.6439
+2023,2018-2022,16.07,"Gradient Boosting (HistGB, Balanced)",Set D (+ All Weather),0.6503
+2023,2018-2022,16.07,Logistic Regression (Balanced),Set A (Calendar + Route + Journey),0.6133
+2023,2018-2022,16.07,Logistic Regression (Balanced),Set C (+ Origin Weather),0.6248
+2023,2018-2022,16.07,Logistic Regression (Balanced),Set D (+ All Weather),0.6294
+2024,2018-2023,23.37,"Gradient Boosting (HistGB, Balanced)",Set A (Calendar + Route + Journey),0.6748
+2024,2018-2023,23.37,"Gradient Boosting (HistGB, Balanced)",Set C (+ Origin Weather),0.6966
+2024,2018-2023,23.37,"Gradient Boosting (HistGB, Balanced)",Set D (+ All Weather),0.7007
+2024,2018-2023,23.37,Logistic Regression (Balanced),Set A (Calendar + Route + Journey),0.6599
+2024,2018-2023,23.37,Logistic Regression (Balanced),Set C (+ Origin Weather),0.6795
+2024,2018-2023,23.37,Logistic Regression (Balanced),Set D (+ All Weather),0.683
