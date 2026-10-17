@@ -1,0 +1,9 @@
+comparison,resampling,point dAUC,ci_low,ci_high,share_boot_le_0,ci_width
+pre-departure Set B vs A (destination weather),by day,0.0182,0.0111,0.0255,0.0,0.0144
+pre-departure Set C vs A (origin weather),by day,0.0218,0.0144,0.029,0.0,0.0146
+pre-departure Set D vs A (all weather),by day,0.0258,0.0176,0.0344,0.0,0.0168
+pre-departure Set C vs A (origin weather),single trains (iid),0.0218,0.0191,0.0242,0.0,0.0051
+en-route 0%: E2 vs E1 (weather now + ahead),by day,0.0105,0.0056,0.0157,0.0,0.0101
+en-route 25%: E2 vs E1 (weather now + ahead),by day,0.0116,0.008,0.0153,0.0,0.0073
+en-route 50%: E2 vs E1 (weather now + ahead),by day,0.002,-0.0008,0.0048,0.089,0.0056
+en-route 75%: E2 vs E1 (weather now + ahead),by day,-0.0006,-0.0022,0.001,0.748,0.0032

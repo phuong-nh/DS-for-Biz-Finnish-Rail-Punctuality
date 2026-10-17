@@ -1,0 +1,8 @@
+score,actual late rate 2024,mean balanced prob,mean corrected prob
+pre-departure Set A,0.2337,0.4434,0.1688
+pre-departure Set C,0.2337,0.445,0.1736
+pre-departure Set D,0.2337,0.4472,0.1767
+en-route 0% E1,0.2332,0.4206,0.1768
+en-route 0% E2,0.2332,0.4263,0.1833
+en-route 50% E1,0.2336,0.4032,0.1857
+en-route 50% E2,0.2336,0.4072,0.1888
