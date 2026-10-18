@@ -210,7 +210,7 @@ def parse_train(row: pd.Series[Any]) -> dict[str, object] | None:
     reached = not bool(last_stop.get("cancelled"))
     delay = _to_float(last_stop.get("differenceInMinutes")) if reached else None
 
-    # Finnish official threshold: >= 5 min at final station is late
+    # late = delay >= 5 min at final station (official stats count up to 5 min as on time)
     is_late: int | None = None
     if delay is not None:
         is_late = 1 if delay >= 5 else 0
